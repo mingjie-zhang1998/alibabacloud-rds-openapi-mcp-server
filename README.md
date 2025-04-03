@@ -1,5 +1,9 @@
 # Alibaba Cloud RDS OpenAPI MCP Server
 MCP server for RDS Services via OPENAPI
+## Prerequisites
+1. Install `uv` from [Astral](https://docs.astral.sh/uv/getting-started/installation/) or the [GitHub README](https://github.com/astral-sh/uv#installation)
+2. Install Python using `uv python install 3.12`
+3. Alibaba Cloud credentials with access to Alibaba Cloud RDS services
 
 ## Configuration
 ### Using Local File
