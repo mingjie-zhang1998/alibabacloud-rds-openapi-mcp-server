@@ -16,9 +16,9 @@ Add the following configuration to the MCP client configuration file:
     "command": "uv",
     "args": [
       "--directory",
-      "/path/to/alibabacloud-rds-openapi-mcp-server",
+      "/path/to/alibabacloud-rds-openapi-mcp-server/src/rds_openapi_mcp_server",
       "run",
-      "rds-openapi-mcp-server"
+      "server.py"
     ],
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",

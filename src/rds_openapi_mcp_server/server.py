@@ -149,4 +149,4 @@ async def describe_db_instance_metrics(region_id: str, db_instance_id: str, star
 
 if __name__ == '__main__':
     # Initialize and run the server
-    mcp.run(transport='sse')
+    mcp.run(transport='stdio')
