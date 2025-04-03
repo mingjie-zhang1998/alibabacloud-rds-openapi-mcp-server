@@ -13,7 +13,7 @@ mcp = FastMCP("Alibaba Cloud RDS OPENAPI")
 
 def get_rds_client(region_id: str):
     config = Config(
-        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),  # 或直接赋值
+        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
         access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
         region_id=region_id,
         protocol="https"
