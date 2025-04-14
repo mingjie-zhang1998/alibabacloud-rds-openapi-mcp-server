@@ -115,6 +115,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "alibabacloud-rds20140815" },
+    { name = "alibabacloud-vpc20160428" },
     { name = "httpx" },
     { name = "mcp", extra = ["cli"] },
 ]
@@ -122,6 +123,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "alibabacloud-rds20140815", specifier = ">=11.0.0" },
+    { name = "alibabacloud-vpc20160428", specifier = ">=6.11.4" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "mcp", extras = ["cli"], specifier = ">=1.6.0" },
 ]
@@ -181,6 +183,21 @@ dependencies = [
     { name = "alibabacloud-tea" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/3b/30/f934051b1f65525d450cb225e4ac81dc3b77d808b0f79d51059d2a7ad3d3/alibabacloud_tea_xml-0.0.2.tar.gz", hash = "sha256:f0135e8148fd7d9c1f029db161863f37f144f837c280cba16c2edeb2f9c549d8", size = 3378 }
+
+[[package]]
+name = "alibabacloud-vpc20160428"
+version = "6.11.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "alibabacloud-endpoint-util" },
+    { name = "alibabacloud-openapi-util" },
+    { name = "alibabacloud-tea-openapi" },
+    { name = "alibabacloud-tea-util" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/dc/57/0a37e587cba727037c8934efe518c446471dbaffe9d606a30ffc54666e98/alibabacloud_vpc20160428-6.11.4.tar.gz", hash = "sha256:476b2b5f31bd56b51d054ef73c5d5bd0b49404c11c64896833f658575994b4a1", size = 461657 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6b/be/2c3beb490e4c386bf215c33ec5758022c0abaada9307e050e8e598d0fd91/alibabacloud_vpc20160428-6.11.4-py3-none-any.whl", hash = "sha256:5777c54189e3524810d27ada84d1c0a25736405174f7780c3af73e88b91ec0cb", size = 468509 },
+]
 
 [[package]]
 name = "annotated-types"
