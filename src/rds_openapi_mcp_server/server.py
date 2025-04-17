@@ -25,7 +25,9 @@ def get_rds_client(region_id: str):
         access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
         access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
         region_id=region_id,
-        protocol="https"
+        protocol="https",
+        connect_timeout=10,
+        read_timeout=300
     )
     client = RdsClient(config)
     return client
@@ -45,6 +47,8 @@ def get_vpc_client(region_id: str) -> VpcClient:
         access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
         region_id=region_id,
         protocol="https",
+        connect_timeout=10,
+        read_timeout=300
     )
     return VpcClient(config)
 
@@ -512,7 +516,7 @@ async def create_db_instance(
 
     except Exception as e:
         logger.error(f"Error occurred while creating RDS instance: {str(e)}")
-        raise OpenAPIError(f"Failed to create RDS instance: {str(e)}")
+        raise e
 
 
 @mcp.tool()
@@ -847,4 +851,4 @@ async def describe_slow_log_records(
 
 if __name__ == '__main__':
     # Initialize and run the server
-    mcp.run(transport='stdio')
+    mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'stdio'))
