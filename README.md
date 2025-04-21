@@ -5,14 +5,37 @@ MCP server for RDS Services via OPENAPI
 2. Install Python using `uv python install 3.12`
 3. Alibaba Cloud credentials with access to Alibaba Cloud RDS services
 
-## Configuration
-### Using Local File
-#### Download
+## Quick Start
+### Download
 Download from Github
 ```shell
 git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 ```
-#### MCP Integration
+### Using Cline
+Set you env and run mcp server.
+```shell
+# set env
+export SERVER_TRANSPORT=sse;
+export ALIBABA_CLOUD_ACCESS_KEY_ID=$you_access_id;
+export ALIBABA_CLOUD_ACCESS_KEY_SECRET=$you_access_key;
+
+# run mcp server
+uv --directory alibabacloud-rds-openapi-mcp-server/src/rds_openapi_mcp_server run server.py
+```
+After run mcp server, you will see the following output:
+```shell
+INFO:     Started server process [91594]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+```
+And then configure the Cline.
+```shell
+remote_server = "http://127.0.0.1:8000/sse";
+```
+
+
+### Using Claude
 Add the following configuration to the MCP client configuration file:
 ```json
 "mcpServers": {
@@ -51,3 +74,14 @@ None at this time
 
 ### Prompts
 None at this time
+
+## Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+This project is licensed under the Apache 2.0 License.
