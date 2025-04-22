@@ -97,6 +97,7 @@ remote_server = "http://127.0.0.1:8000/sse";
 * `describe_slow_log_records`: 查询RDS慢日志记录
 * `modify_parameter`: 修改RDS实例参数
 * `modify_db_instance_spec`: 调整RDS实例规格
+* `get_current_time`: 获取当前时间
 
 ### 资源
 当前暂无资源
