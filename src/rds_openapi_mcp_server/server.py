@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-from http.client import HTTPException
 from typing import Dict, Any, List
 
 from mcp.server.fastmcp import FastMCP
@@ -9,8 +8,7 @@ import logging
 from alibabacloud_rds20140815 import models as rds_20140815_models
 from alibabacloud_rds20140815.client import Client as RdsClient
 from alibabacloud_tea_openapi.models import Config
-from pydantic import BaseModel, Field
-from utils import transform_to_iso_8601, transform_to_datetime
+from utils import transform_to_iso_8601, transform_to_datetime, transform_perf_key
 from alibabacloud_vpc20160428 import models as vpc_20160428_models
 from alibabacloud_vpc20160428.client import Client as VpcClient
 
@@ -93,36 +91,16 @@ async def describe_db_instance_attribute(region_id: str, db_instance_id: str):
         raise e
 
 
-def _get_db_instance_performance_data(region_id: str, db_instance_id: str, start_time: datetime, end_time: datetime):
-    client = get_rds_client(region_id)
-    mysql_perf_keys = [
-        "MySQL_QPSTPS",
-        "MySQL_NetworkTraffic",
-        "MySQL_Sessions",
-        "MySQL_COMDML",
-        "MySQL_ROWDML",
-        "MySQL_MemCpuUsage",
-        "MySQL_IOPS",
-        "MySQL_ThreadStatus"
-    ]
-    perf_datas = {}
-    for key in mysql_perf_keys:
-        try:
-            request = rds_20140815_models.DescribeDBInstancePerformanceRequest(
-                dbinstance_id=db_instance_id,
-                start_time=transform_to_iso_8601(start_time, "minutes"),
-                end_time=transform_to_iso_8601(end_time, "minutes"),
-                key=key
-            )
-            response = client.describe_dbinstance_performance(request)
-            perf_datas[key] = response.body.to_map()
-        except Exception as e:
-            raise e
-    perf_info = "\n".join([f"{k}: {v}" for k, v in perf_datas.items()])
-    return perf_info
-
-
-def _get_db_instance_error_logs(region_id: str, db_instance_id: str, start_time: datetime, end_time: datetime):
+@mcp.tool()
+def describe_error_logs(region_id: str, db_instance_id: str, start_time: datetime, end_time: datetime):
+    """
+    Queries the error log of an instance.
+    Args:
+        region_id: db instance region(e.g. cn-hangzhou)
+        db_instance_id: db instance id(e.g. rm-xxx)
+        start_time: start time UTC TimeZone (e.g. 2023-01-01T00:00Z)
+        end_time: end time UTC TimeZone (e.g. 2023-01-01T00:00Z)
+    """
     client = get_rds_client(region_id)
     try:
         request = rds_20140815_models.DescribeErrorLogsRequest(
@@ -132,53 +110,38 @@ def _get_db_instance_error_logs(region_id: str, db_instance_id: str, start_time:
             page_size=100,
         )
         response = client.describe_error_logs(request)
-        error_logs = "\n".join(response.body.to_map()['Items']['ErrorLog'])
-        return error_logs
-    except Exception as e:
-        raise e
-
-
-def _get_db_instance_sql_reports(region_id: str, db_instance_id: str, start_time: datetime, end_time: datetime):
-    client = get_rds_client(region_id)
-    try:
-        request = rds_20140815_models.DescribeSQLLogReportListRequest(
-            dbinstance_id=db_instance_id,
-            start_time=transform_to_iso_8601(start_time, "seconds"),
-            end_time=transform_to_iso_8601(end_time, "seconds"),
-        )
-        response = client.describe_sqllog_report_list(request)
-        return response.body.to_map()['Items']
+        return response.to_map()
     except Exception as e:
         raise e
 
 
 @mcp.tool()
-async def describe_db_instance_metrics(region_id: str, db_instance_id: str, start_time: str, end_time: str):
+async def describe_db_instance_performance(region_id: str, db_instance_id: str, db_type: str, perf_key: str, start_time: str, end_time: str):
     """
-    Queries the performance data、error log and sql reports of an instance.
+    Queries the performance data of an instance.
     Args:
         region_id: db instance region(e.g. cn-hangzhou)
         db_instance_id: db instance id(e.g. rm-xxx)
+        db_type: the db instance database type(e.g. mysql\pgsql\sqlserver)
+        perf_key: Performance Key(e.g. MemCpuUsage\QPSTPS\Sessions\COMDML\RowDML)
         start_time: start time UTC TimeZone (e.g. 2023-01-01T00:00Z)
         end_time: end time UTC TimeZone (e.g. 2023-01-01T00:00Z)
     """
     try:
         start_time = transform_to_datetime(start_time)
         end_time = transform_to_datetime(end_time)
-        perf_data = _get_db_instance_performance_data(region_id, db_instance_id, start_time, end_time)
-        error_log = _get_db_instance_error_logs(region_id, db_instance_id, start_time, end_time)
-        sql_report = _get_db_instance_sql_reports(region_id, db_instance_id, start_time, end_time)
-        print(perf_data)
-        print(error_log)
-        print(sql_report)
-        return f"""
-## Performance Data
-{perf_data}
-## Error Log
-{error_log}
-## SQL Report
-{sql_report}
-"""
+        client = get_rds_client(region_id)
+        perf_key = transform_perf_key(db_type, perf_key)
+        if not perf_key:
+            raise OpenAPIError(f"Unsupported perf_key: {perf_key}")
+        request = rds_20140815_models.DescribeDBInstancePerformanceRequest(
+            dbinstance_id=db_instance_id,
+            start_time=transform_to_iso_8601(start_time, "minutes"),
+            end_time=transform_to_iso_8601(end_time, "minutes"),
+            key=",".join(perf_key)
+        )
+        response = client.describe_dbinstance_performance(request)
+        return [perf_key.to_map() for perf_key in response.body.performance_keys.performance_key]
     except Exception as e:
         raise e
 
@@ -847,6 +810,29 @@ async def describe_slow_log_records(
     except Exception as e:
         logger.error(f"Error occurred while querying slow log records: {str(e)}")
         raise OpenAPIError(f"Failed to query slow log records: {str(e)}")
+
+
+@mcp.tool()
+async def get_current_time() -> Dict[str, Any]:
+    """Get the current time.
+
+    Returns:
+        Dict[str, Any]: The response containing the current time.
+    """
+    try:
+        # Get the current time
+        current_time = datetime.now()
+
+        # Format the current time as a string
+        formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
+        # Return the response
+        return {
+            "current_time": formatted_time
+        }
+    except Exception as e:
+        logger.error(f"Error occurred while getting the current time: {str(e)}")
+        raise Exception(f"Failed to get the current time: {str(e)}")
 
 
 if __name__ == '__main__':

@@ -88,6 +88,8 @@ remote_server = "http://127.0.0.1:8000/sse";
 * `describe_db_instances`: 查询实例列表
 * `describe_db_instance_attribute`: 查询实例详情
 * `describe_db_instance_metrics`: 查询实例性能数据、错误日志和SQL报告
+* `describe_db_instance_performance`: 查询实例性能数据
+* `describe_error_logs`: 查询实例错误日志
 * `describe_available_classes`: 查询可用实例规格和存储范围
 * `describe_available_zones`: 查询RDS可用区
 * `describe_vpcs`: 查询VPC列表

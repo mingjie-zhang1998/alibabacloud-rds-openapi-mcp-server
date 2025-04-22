@@ -89,7 +89,8 @@ Add the following configuration to the MCP client configuration file:
 * `create_db_instance`: Create an RDS instance.
 * `describe_db_instances`: Queries instances.
 * `describe_db_instance_attribute`: Queries the details of an instance.
-* `describe_db_instance_metrics`: Queries the performance data、error log and sql reports of an instance.
+* `describe_db_instance_performance`: Queries the performance data of an instance.
+* `describe_error_logs`: Queries the error log of an instance.
 * `describe_available_classes`: Query available instance classes and storage ranges.
 * `describe_available_zones`: Query available zones for RDS instances.
 * `describe_vpcs`: Query VPC list.
