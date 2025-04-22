@@ -326,7 +326,7 @@ async def describe_available_classes(
 
     Args:
         region_id (str): The region ID of the RDS instance.
-        zone_id (str): The zone ID of the RDS instance.
+        zone_id (str): The zone ID of the RDS instance. Query available zones by `describe_available_zones`.
         instance_charge_type (str): Instance payment type. Values: Prepaid, Postpaid, Serverless.
         engine (str): Database engine type. Values: MySQL, SQLServer, PostgreSQL, MariaDB.
         engine_version (str): Database version.
@@ -380,9 +380,9 @@ async def create_db_instance(
         dbinstance_storage: int,
         vpc_id: str,
         vswitch_id: str,
+        zone_id: str,
         security_ip_list: str = "127.0.0.1",
         instance_network_type: str = "VPC",
-        zone_id: str = None,
         pay_type: str = "Postpaid",
         instance_charge_type: str = None,
         system_db_charset: str = None,
