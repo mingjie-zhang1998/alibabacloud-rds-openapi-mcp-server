@@ -403,11 +403,11 @@ async def create_db_instance(
         region_id (str): Region ID.
         engine (str): Database type (MySQL, SQLServer, PostgreSQL, MariaDB).
         engine_version (str): Database version.
-        dbinstance_class (str): Instance specification.
+        dbinstance_class (str): Instance specification. Query available class_codes by `describe_available_classes`.
         dbinstance_storage (int): Storage space in GB.
         security_ip_list (str): IP whitelist, separated by commas. Default: "127.0.0.1".
         instance_network_type (str, optional): Network type (Classic, VPC). Default: VPC.
-        zone_id (str, optional): Zone ID.
+        zone_id (str, optional): Zone ID. Query available zones by `describe_available_zones`.
         pay_type (str, optional): Payment type (Postpaid, Prepaid). Default: Postpaid.
         instance_charge_type (str, optional): Instance charge type.
         system_db_charset (str, optional): Character set.
