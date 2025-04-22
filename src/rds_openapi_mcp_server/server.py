@@ -1,17 +1,17 @@
 import json
-from datetime import datetime
+import logging
+import os
+import time
 from typing import Dict, Any, List
 
-from mcp.server.fastmcp import FastMCP
-import os
-import logging
 from alibabacloud_rds20140815 import models as rds_20140815_models
 from alibabacloud_rds20140815.client import Client as RdsClient
 from alibabacloud_tea_openapi.models import Config
-from utils import transform_to_iso_8601, transform_to_datetime, transform_perf_key
 from alibabacloud_vpc20160428 import models as vpc_20160428_models
 from alibabacloud_vpc20160428.client import Client as VpcClient
+from mcp.server.fastmcp import FastMCP
 
+from utils import transform_to_iso_8601, transform_to_datetime, transform_perf_key
 
 logger = logging.getLogger(__name__)
 
@@ -92,17 +92,19 @@ async def describe_db_instance_attribute(region_id: str, db_instance_id: str):
 
 
 @mcp.tool()
-def describe_error_logs(region_id: str, db_instance_id: str, start_time: datetime, end_time: datetime):
+async def describe_error_logs(region_id: str, db_instance_id: str, start_time: str, end_time: str):
     """
     Queries the error log of an instance.
     Args:
         region_id: db instance region(e.g. cn-hangzhou)
         db_instance_id: db instance id(e.g. rm-xxx)
-        start_time: start time UTC TimeZone (e.g. 2023-01-01T00:00Z)
-        end_time: end time UTC TimeZone (e.g. 2023-01-01T00:00Z)
+        start_time: start time(e.g. 2023-01-01T00:00Z)
+        end_time: end time(e.g. 2023-01-01T00:00Z)
     """
     client = get_rds_client(region_id)
     try:
+        start_time = transform_to_datetime(start_time)
+        end_time = transform_to_datetime(end_time)
         request = rds_20140815_models.DescribeErrorLogsRequest(
             dbinstance_id=db_instance_id,
             start_time=transform_to_iso_8601(start_time, "minutes"),
@@ -124,8 +126,8 @@ async def describe_db_instance_performance(region_id: str, db_instance_id: str, 
         db_instance_id: db instance id(e.g. rm-xxx)
         db_type: the db instance database type(e.g. mysql\pgsql\sqlserver)
         perf_key: Performance Key(e.g. MemCpuUsage\QPSTPS\Sessions\COMDML\RowDML)
-        start_time: start time UTC TimeZone (e.g. 2023-01-01T00:00Z)
-        end_time: end time UTC TimeZone (e.g. 2023-01-01T00:00Z)
+        start_time: start time(e.g. 2023-01-01T00:00Z)
+        end_time: end time(e.g. 2023-01-01T00:00Z)
     """
     try:
         start_time = transform_to_datetime(start_time)
@@ -755,9 +757,9 @@ async def describe_slow_log_records(
     Args:
         region_id (str): The region ID of the RDS instance.
         dbinstance_id (str): The ID of the RDS instance.
-        start_time (str): Start time in format: yyyy-MM-ddTHH:mmZ (UTC time).
+        start_time (str): Start time in format: yyyy-MM-ddTHH:mmZ.
             Cannot be earlier than 30 days before the current time.
-        end_time (str): End time in format: yyyy-MM-ddTHH:mmZ (UTC time).
+        end_time (str): End time in format: yyyy-MM-ddTHH:mmZ.
             Must be later than the start time.
         sqlhash (str, optional): The unique identifier of the SQL statement in slow log statistics.
             Used to get slow log details for a specific SQL statement.
@@ -773,24 +775,13 @@ async def describe_slow_log_records(
     try:
         # Initialize the client
         client = get_rds_client(region_id)
-
-        try:
-            dt = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ")
-            start_time = dt.strftime("%Y-%m-%dT%H:%M")
-        except ValueError:
-            pass
-
-        try:
-            dt = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%SZ")
-            end_time = dt.strftime("%Y-%m-%dT%H:%M")
-        except ValueError:
-            pass
-
+        start_time = transform_to_datetime(start_time)
+        end_time = transform_to_datetime(end_time)
         # Create request
         request = rds_20140815_models.DescribeSlowLogRecordsRequest(
             dbinstance_id=dbinstance_id,
-            start_time=start_time,
-            end_time=end_time,
+            start_time=transform_to_iso_8601(start_time, "minutes"),
+            end_time=transform_to_iso_8601(end_time, "minutes"),
             page_size=page_size,
             page_number=page_number
         )

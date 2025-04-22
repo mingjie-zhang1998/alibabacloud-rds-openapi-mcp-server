@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 PERF_KEYS = {
@@ -30,7 +30,7 @@ PERF_KEYS = {
 }
 
 def transform_to_iso_8601(dt: datetime, timespec: str):
-    return dt.isoformat(timespec=timespec) + "Z"
+    return dt.astimezone(timezone.utc).isoformat(timespec=timespec).replace("+00:00", "Z")
 
 
 def transform_to_datetime(s: str):
