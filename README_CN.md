@@ -1,3 +1,8 @@
+<h1 align="center">
+  <a>
+    <img src="https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server/blob/main/assets/rds_mcp.png?raw=true" width="541" height="360.5" alt="banner" /><br>
+  </a>
+</h1>
 <p align="center"><a href="./README.md">English</a> | 中文<br></p>
 
 # 阿里云RDS OpenAPI MCP 服务
