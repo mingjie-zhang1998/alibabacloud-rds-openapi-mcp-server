@@ -1,17 +1,17 @@
 import json
-from datetime import datetime
+import logging
+import os
+import time
 from typing import Dict, Any, List
 
-from mcp.server.fastmcp import FastMCP
-import os
-import logging
 from alibabacloud_rds20140815 import models as rds_20140815_models
 from alibabacloud_rds20140815.client import Client as RdsClient
 from alibabacloud_tea_openapi.models import Config
-from utils import transform_to_iso_8601, transform_to_datetime, transform_perf_key
 from alibabacloud_vpc20160428 import models as vpc_20160428_models
 from alibabacloud_vpc20160428.client import Client as VpcClient
+from mcp.server.fastmcp import FastMCP
 
+from utils import transform_to_iso_8601, transform_to_datetime, transform_perf_key
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +92,32 @@ async def describe_db_instance_attribute(region_id: str, db_instance_id: str):
 
 
 @mcp.tool()
+async def describe_error_logs(region_id: str, db_instance_id: str, start_time: str, end_time: str):
+    """
+    Queries the error log of an instance.
+    Args:
+        region_id: db instance region(e.g. cn-hangzhou)
+        db_instance_id: db instance id(e.g. rm-xxx)
+        start_time: start time(e.g. 2023-01-01T00:00Z)
+        end_time: end time(e.g. 2023-01-01T00:00Z)
+    """
+    client = get_rds_client(region_id)
+    try:
+        start_time = transform_to_datetime(start_time)
+        end_time = transform_to_datetime(end_time)
+        request = rds_20140815_models.DescribeErrorLogsRequest(
+            dbinstance_id=db_instance_id,
+            start_time=transform_to_iso_8601(start_time, "minutes"),
+            end_time=transform_to_iso_8601(end_time, "minutes"),
+            page_size=100,
+        )
+        response = client.describe_error_logs(request)
+        return response.to_map()
+    except Exception as e:
+        raise e
+
+
+@mcp.tool()
 async def describe_db_instance_performance(region_id: str, db_instance_id: str, db_type: str, perf_key: str, start_time: str, end_time: str):
     """
     Queries the performance data of an instance.
@@ -100,8 +126,8 @@ async def describe_db_instance_performance(region_id: str, db_instance_id: str, 
         db_instance_id: db instance id(e.g. rm-xxx)
         db_type: the db instance database type(e.g. mysql\pgsql\sqlserver)
         perf_key: Performance Key(e.g. MemCpuUsage\QPSTPS\Sessions\COMDML\RowDML)
-        start_time: start time UTC TimeZone (e.g. 2023-01-01T00:00Z)
-        end_time: end time UTC TimeZone (e.g. 2023-01-01T00:00Z)
+        start_time: start time(e.g. 2023-01-01T00:00Z)
+        end_time: end time(e.g. 2023-01-01T00:00Z)
     """
     try:
         start_time = transform_to_datetime(start_time)
@@ -731,9 +757,9 @@ async def describe_slow_log_records(
     Args:
         region_id (str): The region ID of the RDS instance.
         dbinstance_id (str): The ID of the RDS instance.
-        start_time (str): Start time in format: yyyy-MM-ddTHH:mmZ (UTC time).
+        start_time (str): Start time in format: yyyy-MM-ddTHH:mmZ.
             Cannot be earlier than 30 days before the current time.
-        end_time (str): End time in format: yyyy-MM-ddTHH:mmZ (UTC time).
+        end_time (str): End time in format: yyyy-MM-ddTHH:mmZ.
             Must be later than the start time.
         sqlhash (str, optional): The unique identifier of the SQL statement in slow log statistics.
             Used to get slow log details for a specific SQL statement.
@@ -749,24 +775,13 @@ async def describe_slow_log_records(
     try:
         # Initialize the client
         client = get_rds_client(region_id)
-
-        try:
-            dt = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%SZ")
-            start_time = dt.strftime("%Y-%m-%dT%H:%M")
-        except ValueError:
-            pass
-
-        try:
-            dt = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%SZ")
-            end_time = dt.strftime("%Y-%m-%dT%H:%M")
-        except ValueError:
-            pass
-
+        start_time = transform_to_datetime(start_time)
+        end_time = transform_to_datetime(end_time)
         # Create request
         request = rds_20140815_models.DescribeSlowLogRecordsRequest(
             dbinstance_id=dbinstance_id,
-            start_time=start_time,
-            end_time=end_time,
+            start_time=transform_to_iso_8601(start_time, "minutes"),
+            end_time=transform_to_iso_8601(end_time, "minutes"),
             page_size=page_size,
             page_number=page_number
         )
@@ -786,76 +801,6 @@ async def describe_slow_log_records(
     except Exception as e:
         logger.error(f"Error occurred while querying slow log records: {str(e)}")
         raise OpenAPIError(f"Failed to query slow log records: {str(e)}")
-
-
-@mcp.tool()
-async def describe_error_logs(
-        region_id: str,
-        db_instance_id: str,
-        start_time: str,
-        end_time: str,
-        page_size: int = 30,
-        page_number: int = 1
-) -> Dict[str, Any]:
-    """
-    Query error logs of an RDS instance.
-
-    Args:
-        region_id (str): The region ID of the RDS instance.
-        db_instance_id (str): The ID of the RDS instance.
-        start_time (str): The start time of the query. Format: yyyy-MM-ddTHH:mmZ (UTC time).
-        end_time (str): The end time of the query. Format: yyyy-MM-ddTHH:mmZ (UTC time).
-        page_size (int): The number of records per page. Range: 30~100. Default: 30.
-        page_number (int): The page number. Default: 1.
-
-    Returns:
-        Dict[str, Any]: A dictionary containing error log information with the following structure:
-        {
-            "Items": {
-                "ErrorLog": [
-                    {
-                        "CreateTime": "2011-05-30T12:11:04Z",
-                        "ErrorInfo": "Error log content"
-                    }
-                ]
-            },
-            "PageNumber": 1,
-            "PageRecordCount": 30,
-            "TotalRecordCount": 100,
-            "RequestId": "98504E07-BB0E-40FC-B152-E4882615812C"
-        }
-
-    Raises:
-        OpenAPIError: If the API call fails or returns an error.
-    """
-    try:
-        client = get_rds_client(region_id)
-        request = rds_20140815_models.DescribeErrorLogsRequest(
-            dbinstance_id=db_instance_id,
-            start_time=start_time,
-            end_time=end_time,
-            page_size=page_size,
-            page_number=page_number
-        )
-        response = await client.describe_error_logs_async(request)
-        return {
-            "Items": {
-                "ErrorLog": [
-                    {
-                        "CreateTime": log.create_time,
-                        "ErrorInfo": log.error_info
-                    }
-                    for log in response.body.items.error_log
-                ]
-            },
-            "PageNumber": response.body.page_number,
-            "PageRecordCount": response.body.page_record_count,
-            "TotalRecordCount": response.body.total_record_count,
-            "RequestId": response.body.request_id
-        }
-    except Exception as e:
-        logger.error(f"Failed to describe error logs: {str(e)}")
-        raise OpenAPIError(f"Failed to describe error logs: {str(e)}")
 
 
 @mcp.tool()
