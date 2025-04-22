@@ -1,6 +1,6 @@
 <h1 align="center">
   <a>
-    <img src="https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server/blob/main/assets/rds_mcp.png?raw=true" width="150" height="150" alt="banner" /><br>
+    <img src="https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server/blob/main/assets/rds_mcp.png?raw=true" width="541" height="360.5" alt="banner" /><br>
   </a>
 </h1>
 <p align="center">English | <a href="./README_CN.md">中文</a><br></p>
