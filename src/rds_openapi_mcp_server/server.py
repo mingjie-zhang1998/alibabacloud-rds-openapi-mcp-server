@@ -47,8 +47,8 @@ def get_vpc_client(region_id: str) -> VpcClient:
         access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
         region_id=region_id,
         protocol="https",
-        connect_timeout=10,
-        read_timeout=300
+        connect_timeout=10 * 1000,
+        read_timeout=300 * 1000
     )
     return VpcClient(config)
 
