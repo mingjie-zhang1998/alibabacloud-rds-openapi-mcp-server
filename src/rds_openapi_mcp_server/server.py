@@ -322,7 +322,7 @@ async def describe_available_classes(
         order_type: str = None,
         commodity_code: str = None
 ) -> Dict[str, Any]:
-    """Query available instance classes and storage ranges.
+    """Query the RDS instance class_code and storage space that can be purchased in the inventory.
 
     Args:
         region_id (str): The region ID of the RDS instance.
@@ -330,7 +330,7 @@ async def describe_available_classes(
         instance_charge_type (str): Instance payment type. Values: Prepaid, Postpaid, Serverless.
         engine (str): Database engine type. Values: MySQL, SQLServer, PostgreSQL, MariaDB.
         engine_version (str): Database version.
-        dbinstance_storage_type (str): Storage type. Values: local_ssd, cloud_ssd, cloud_essd, cloud_essd2, cloud_essd3.
+        dbinstance_storage_type (str): Storage type. Values: local_ssd\general_essd\cloud_essd\cloud_essd2\cloud_essd3
         category (str): Instance category. Values: Basic, HighAvailability, cluster, AlwaysOn, Finance, serverless_basic, serverless_standard, serverless_ha.
         dbinstance_id (str, optional): The ID of the RDS instance.
         order_type (str, optional): Order type. Currently only supports "BUY".
@@ -388,7 +388,7 @@ async def create_db_instance(
         system_db_charset: str = None,
         dbinstance_net_type: str = "Internet",
         category: str = "Basic",
-        dbinstance_storage_type: str = "cloud_essd",
+        dbinstance_storage_type: str = None,
         private_ip_address: str = None,
         client_token: str = None,
         resource_group_id: str = None,
@@ -413,7 +413,7 @@ async def create_db_instance(
         system_db_charset (str, optional): Character set.
         dbinstance_net_type (str, optional): Network connection type (Internet, Intranet). Default: Internet.
         category (str, optional): Instance category. Default: Basic.
-        dbinstance_storage_type (str, optional): Storage type. Default: cloud_essd.
+        dbinstance_storage_type (str, optional): Storage type. (e.g. local_ssd\general_essd\cloud_essd\cloud_essd2\cloud_essd3)
         vpc_id (str): VPC ID.
         vswitch_id (str): VSwitch ID.
         private_ip_address (str, optional): Private IP address.
