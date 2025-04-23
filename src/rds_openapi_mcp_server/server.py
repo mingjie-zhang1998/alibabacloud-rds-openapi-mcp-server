@@ -808,6 +808,77 @@ async def describe_slow_log_records(
 
 
 @mcp.tool()
+async def describe_error_logs(
+        region_id: str,
+        db_instance_id: str,
+        start_time: str,
+        end_time: str,
+        page_size: int = 30,
+        page_number: int = 1
+) -> Dict[str, Any]:
+    """
+    Query error logs of an RDS instance.
+
+    Args:
+        region_id (str): The region ID of the RDS instance.
+        db_instance_id (str): The ID of the RDS instance.
+        start_time (str): The start time of the query. Format: yyyy-MM-ddTHH:mmZ (UTC time).
+        end_time (str): The end time of the query. Format: yyyy-MM-ddTHH:mmZ (UTC time).
+        page_size (int): The number of records per page. Range: 30~100. Default: 30.
+        page_number (int): The page number. Default: 1.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing error log information with the following structure:
+        {
+            "Items": {
+                "ErrorLog": [
+                    {
+                        "CreateTime": "2011-05-30T12:11:04Z",
+                        "ErrorInfo": "Error log content"
+                    }
+                ]
+            },
+            "PageNumber": 1,
+            "PageRecordCount": 30,
+            "TotalRecordCount": 100,
+            "RequestId": "98504E07-BB0E-40FC-B152-E4882615812C"
+        }
+
+    Raises:
+        OpenAPIError: If the API call fails or returns an error.
+    """
+    try:
+        start_time = transform_to_datetime(start_time)
+        end_time = transform_to_datetime(end_time)
+        client = get_rds_client(region_id)
+        request = rds_20140815_models.DescribeErrorLogsRequest(
+            dbinstance_id=db_instance_id,
+            start_time=start_time,
+            end_time=end_time,
+            page_size=page_size,
+            page_number=page_number
+        )
+        response = await client.describe_error_logs_async(request)
+        return {
+            "Items": {
+                "ErrorLog": [
+                    {
+                        "CreateTime": log.create_time,
+                        "ErrorInfo": log.error_info
+                    }
+                    for log in response.body.items.error_log
+                ]
+            },
+            "PageNumber": response.body.page_number,
+            "PageRecordCount": response.body.page_record_count,
+            "TotalRecordCount": response.body.total_record_count,
+            "RequestId": response.body.request_id
+        }
+    except Exception as e:
+        logger.error(f"Failed to describe error logs: {str(e)}")
+        raise OpenAPIError(f"Failed to describe error logs: {str(e)}")
+
+@mcp.tool()
 async def get_current_time() -> Dict[str, Any]:
     """Get the current time.
 
