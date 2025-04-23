@@ -92,32 +92,6 @@ async def describe_db_instance_attribute(region_id: str, db_instance_id: str):
 
 
 @mcp.tool()
-async def describe_error_logs(region_id: str, db_instance_id: str, start_time: str, end_time: str):
-    """
-    Queries the error log of an instance.
-    Args:
-        region_id: db instance region(e.g. cn-hangzhou)
-        db_instance_id: db instance id(e.g. rm-xxx)
-        start_time: start time(e.g. 2023-01-01T00:00Z)
-        end_time: end time(e.g. 2023-01-01T00:00Z)
-    """
-    client = get_rds_client(region_id)
-    try:
-        start_time = transform_to_datetime(start_time)
-        end_time = transform_to_datetime(end_time)
-        request = rds_20140815_models.DescribeErrorLogsRequest(
-            dbinstance_id=db_instance_id,
-            start_time=transform_to_iso_8601(start_time, "minutes"),
-            end_time=transform_to_iso_8601(end_time, "minutes"),
-            page_size=100,
-        )
-        response = client.describe_error_logs(request)
-        return response.to_map()
-    except Exception as e:
-        raise e
-
-
-@mcp.tool()
 async def describe_db_instance_performance(region_id: str, db_instance_id: str, db_type: str, perf_key: str, start_time: str, end_time: str):
     """
     Queries the performance data of an instance.
@@ -818,34 +792,15 @@ async def describe_error_logs(
 ) -> Dict[str, Any]:
     """
     Query error logs of an RDS instance.
-
     Args:
         region_id (str): The region ID of the RDS instance.
         db_instance_id (str): The ID of the RDS instance.
-        start_time (str): The start time of the query. Format: yyyy-MM-ddTHH:mmZ (UTC time).
-        end_time (str): The end time of the query. Format: yyyy-MM-ddTHH:mmZ (UTC time).
+        start_time (str): The start time of the query. Format: yyyy-MM-ddTHH:mmZ.
+        end_time (str): The end time of the query. Format: yyyy-MM-ddTHH:mmZ.
         page_size (int): The number of records per page. Range: 30~100. Default: 30.
         page_number (int): The page number. Default: 1.
-
     Returns:
-        Dict[str, Any]: A dictionary containing error log information with the following structure:
-        {
-            "Items": {
-                "ErrorLog": [
-                    {
-                        "CreateTime": "2011-05-30T12:11:04Z",
-                        "ErrorInfo": "Error log content"
-                    }
-                ]
-            },
-            "PageNumber": 1,
-            "PageRecordCount": 30,
-            "TotalRecordCount": 100,
-            "RequestId": "98504E07-BB0E-40FC-B152-E4882615812C"
-        }
-
-    Raises:
-        OpenAPIError: If the API call fails or returns an error.
+        Dict[str, Any]: A dictionary containing error log information
     """
     try:
         start_time = transform_to_datetime(start_time)
@@ -871,8 +826,7 @@ async def describe_error_logs(
             },
             "PageNumber": response.body.page_number,
             "PageRecordCount": response.body.page_record_count,
-            "TotalRecordCount": response.body.total_record_count,
-            "RequestId": response.body.request_id
+            "TotalRecordCount": response.body.total_record_count
         }
     except Exception as e:
         logger.error(f"Failed to describe error logs: {str(e)}")
