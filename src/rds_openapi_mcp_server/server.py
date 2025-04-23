@@ -143,7 +143,11 @@ async def describe_db_instance_performance(region_id: str, db_instance_id: str, 
             key=",".join(perf_key)
         )
         response = client.describe_dbinstance_performance(request)
-        return [perf_key.to_map() for perf_key in response.body.performance_keys.performance_key]
+        responses = []
+        for perf_key in response.body.performance_keys.performance_key:
+            perf_key_info = f"""Key={perf_key.key}; Unit={perf_key.unit}; ValueFormat={perf_key.value_format}; Values={";".join([f"{value.date} {value.value}" for value in perf_key.values.performance_value])}"""
+            responses.append(perf_key_info)
+        return responses
     except Exception as e:
         raise e
 

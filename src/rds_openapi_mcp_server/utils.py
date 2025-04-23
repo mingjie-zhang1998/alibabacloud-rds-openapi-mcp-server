@@ -42,4 +42,10 @@ def transform_to_datetime(s: str):
 
 
 def transform_perf_key(db_type: str, perf_key: str):
+    perf_key_after_transform = []
+    for key in perf_key.split(","):
+        if key in PERF_KEYS[db_type.lower()]:
+            perf_key_after_transform.extend(PERF_KEYS[db_type.lower()][key])
+        else:
+            perf_key_after_transform.append(key)
     return PERF_KEYS[db_type.lower()][perf_key]
