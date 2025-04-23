@@ -808,22 +808,14 @@ async def describe_error_logs(
         client = get_rds_client(region_id)
         request = rds_20140815_models.DescribeErrorLogsRequest(
             dbinstance_id=db_instance_id,
-            start_time=start_time,
-            end_time=end_time,
+            start_time=transform_to_iso_8601(start_time, "minutes"),
+            end_time=transform_to_iso_8601(end_time, "minutes"),
             page_size=page_size,
             page_number=page_number
         )
         response = await client.describe_error_logs_async(request)
         return {
-            "Items": {
-                "ErrorLog": [
-                    {
-                        "CreateTime": log.create_time,
-                        "ErrorInfo": log.error_info
-                    }
-                    for log in response.body.items.error_log
-                ]
-            },
+            "Logs": "\n".join([log.error_info for log in response.body.items.error_log]),
             "PageNumber": response.body.page_number,
             "PageRecordCount": response.body.page_record_count,
             "TotalRecordCount": response.body.total_record_count
