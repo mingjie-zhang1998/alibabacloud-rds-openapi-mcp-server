@@ -35,9 +35,9 @@ def transform_to_iso_8601(dt: datetime, timespec: str):
 
 def transform_to_datetime(s: str):
     try:
-        dt = datetime.strptime(s, "%Y-%m-%dT%H:%M:%Sz")
+        dt = datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
     except ValueError:
-        dt = datetime.strptime(s, "%Y-%m-%dT%H:%Mz")
+        dt = datetime.strptime(s, "%Y-%m-%d %H:%M")
     return dt
 
 

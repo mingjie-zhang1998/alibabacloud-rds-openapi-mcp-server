@@ -100,8 +100,8 @@ async def describe_db_instance_performance(region_id: str, db_instance_id: str, 
         db_instance_id: db instance id(e.g. rm-xxx)
         db_type: the db instance database type(e.g. mysql\pgsql\sqlserver)
         perf_key: Performance Key(e.g. MemCpuUsage\QPSTPS\Sessions\COMDML\RowDML)
-        start_time: start time(e.g. 2023-01-01T00:00Z)
-        end_time: end time(e.g. 2023-01-01T00:00Z)
+        start_time: start time(e.g. 2023-01-01 00:00)
+        end_time: end time(e.g. 2023-01-01 00:00)
     """
     try:
         start_time = transform_to_datetime(start_time)
@@ -119,7 +119,7 @@ async def describe_db_instance_performance(region_id: str, db_instance_id: str, 
         response = client.describe_dbinstance_performance(request)
         responses = []
         for perf_key in response.body.performance_keys.performance_key:
-            perf_key_info = f"""Key={perf_key.key}; Unit={perf_key.unit}; ValueFormat={perf_key.value_format}; Values={";".join([f"{value.date} {value.value}" for value in perf_key.values.performance_value])}"""
+            perf_key_info = f"""Key={perf_key.key}; Unit={perf_key.unit}; ValueFormat={perf_key.value_format}; Values={"|".join([f"{value.date} {value.value}" for value in perf_key.values.performance_value])}"""
             responses.append(perf_key_info)
         return responses
     except Exception as e:
@@ -176,7 +176,7 @@ async def modify_parameter(
 
         # Make the API request
         response = client.modify_parameter(request)
-        return response.to_map()
+        return response.body.to_map()
 
     except Exception as e:
         logger.error(f"Error occurred while modifying parameters: {str(e)}")
@@ -282,7 +282,7 @@ async def modify_db_instance_spec(
 
         # Make the API request
         response = client.modify_dbinstance_spec(request)
-        return response.to_map()
+        return response.body.to_map()
 
     except Exception as e:
         logger.error(f"Error occurred while modifying instance specifications: {str(e)}")
@@ -344,7 +344,7 @@ async def describe_available_classes(
 
         # Make the API request
         response = client.describe_available_classes(request)
-        return response.to_map()
+        return response.body.to_map()
 
     except Exception as e:
         logger.error(f"Error occurred while querying available classes: {str(e)}")
@@ -455,7 +455,7 @@ async def create_db_instance(
             request.serverless_config = json.dumps(serverless_config)
 
         response = client.create_dbinstance(request)
-        return response.to_map()
+        return response.body.to_map()
 
     except Exception as e:
         logger.error(f"Error occurred while creating RDS instance: {str(e)}")
@@ -538,7 +538,7 @@ async def describe_available_zones(
 
         # Make the API request
         response = client.describe_available_zones(request)
-        return response.to_map()
+        return response.body.to_map()
 
     except Exception as e:
         logger.error(f"Error occurred while querying available zones: {str(e)}")
@@ -550,14 +550,10 @@ async def describe_vpcs(
         region_id: str,
         vpc_id: str = None,
         vpc_name: str = None,
-        is_default: bool = None,
-        dry_run: bool = None,
         resource_group_id: str = None,
         page_number: int = 1,
         page_size: int = 10,
         vpc_owner_id: int = None,
-        dhcp_options_set_id: str = None,
-        enable_ipv6: bool = None,
         tags: List[Dict[str, str]] = None
 ) -> Dict[str, Any]:
     """Query VPC list.
@@ -566,20 +562,10 @@ async def describe_vpcs(
         region_id (str): The region ID of the VPC.
         vpc_id (str, optional): The ID of the VPC. Up to 20 VPC IDs can be specified, separated by commas.
         vpc_name (str, optional): The name of the VPC.
-        is_default (bool, optional): Whether to query the default VPC in the specified region.
-            true: Query the default VPC (default)
-            false: Do not query the default VPC
-        dry_run (bool, optional): Whether to only precheck the request.
-            true: Send a check request without querying resources
-            false: Send a normal request (default)
         resource_group_id (str, optional): The resource group ID of the VPC to query.
         page_number (int, optional): The page number of the list. Default: 1.
         page_size (int, optional): The number of entries per page. Maximum value: 50. Default: 10.
         vpc_owner_id (int, optional): The Alibaba Cloud account ID of the VPC owner.
-        dhcp_options_set_id (str, optional): The ID of the DHCP options set.
-        enable_ipv6 (bool, optional): Whether to query VPCs with IPv6 segments enabled.
-            false: Disabled
-            true: Enabled
         tags (List[Dict[str, str]], optional): The tags of the resource.
 
     Returns:
@@ -601,18 +587,10 @@ async def describe_vpcs(
             request.vpc_id = vpc_id
         if vpc_name:
             request.vpc_name = vpc_name
-        if is_default is not None:
-            request.is_default = is_default
-        if dry_run is not None:
-            request.dry_run = dry_run
         if resource_group_id:
             request.resource_group_id = resource_group_id
         if vpc_owner_id:
             request.vpc_owner_id = vpc_owner_id
-        if dhcp_options_set_id:
-            request.dhcp_options_set_id = dhcp_options_set_id
-        if enable_ipv6 is not None:
-            request.enable_ipv6 = enable_ipv6
         if tags:
             request.tag = tags
 
@@ -632,14 +610,11 @@ async def describe_vswitches(
         vswitch_id: str = None,
         zone_id: str = None,
         vswitch_name: str = None,
-        dry_run: bool = None,
         is_default: bool = None,
-        route_table_id: str = None,
         resource_group_id: str = None,
         page_number: int = 1,
         page_size: int = 10,
         vswitch_owner_id: int = None,
-        enable_ipv6: bool = None,
         tags: List[Dict[str, str]] = None
 ) -> Dict[str, Any]:
     """Query VSwitch list.
@@ -649,23 +624,11 @@ async def describe_vswitches(
         vpc_id (str, optional): The ID of the VPC to which the VSwitch belongs. At least one of region_id or vpc_id must be specified.
         vswitch_id (str, optional): The ID of the VSwitch to query.
         zone_id (str, optional): The zone ID of the VSwitch.
-        vswitch_name (str, optional): The name of the VSwitch. Length: 1-128 characters, cannot start with http:// or https://.
-        dry_run (bool, optional): Whether to only precheck the request.
-            true: Send a check request without querying resources
-            false: Send a normal request (default)
-        is_default (bool, optional): Whether to query the default VSwitch in the specified region.
-            true: Query the default VSwitch
-            false: Do not query the default VSwitch
-            If not specified, all VSwitches in the specified region are queried
-        route_table_id (str, optional): The ID of the route table.
+        vswitch_name (str, optional): The name of the VSwitch.
         resource_group_id (str, optional): The resource group ID of the VSwitch.
         page_number (int, optional): The page number of the list. Default: 1.
         page_size (int, optional): The number of entries per page. Maximum value: 50. Default: 10.
         vswitch_owner_id (int, optional): The Alibaba Cloud account ID of the VSwitch owner.
-        enable_ipv6 (bool, optional): Whether to query VSwitches with IPv6 segments enabled.
-            true: Query VSwitches with IPv6 segments enabled
-            false: Do not query VSwitches with IPv6 segments enabled
-            If not specified, all VSwitches in the specified region are queried
         tags (List[Dict[str, str]], optional): The tags of the resource.
 
     Returns:
@@ -693,24 +656,18 @@ async def describe_vswitches(
             request.zone_id = zone_id
         if vswitch_name:
             request.vswitch_name = vswitch_name
-        if dry_run is not None:
-            request.dry_run = dry_run
         if is_default is not None:
             request.is_default = is_default
-        if route_table_id:
-            request.route_table_id = route_table_id
         if resource_group_id:
             request.resource_group_id = resource_group_id
         if vswitch_owner_id:
             request.vswitch_owner_id = vswitch_owner_id
-        if enable_ipv6 is not None:
-            request.enable_ipv6 = enable_ipv6
         if tags:
             request.tag = tags
 
         # Make the API request
         response = client.describe_vswitches(request)
-        return response.to_map()
+        return response.body.to_map()
 
     except Exception as e:
         logger.error(f"Error occurred while querying VSwitches: {str(e)}")
@@ -735,9 +692,9 @@ async def describe_slow_log_records(
     Args:
         region_id (str): The region ID of the RDS instance.
         dbinstance_id (str): The ID of the RDS instance.
-        start_time (str): Start time in format: yyyy-MM-ddTHH:mmZ.
+        start_time (str): Start time in format: yyyy-MM-dd HH:mm.
             Cannot be earlier than 30 days before the current time.
-        end_time (str): End time in format: yyyy-MM-ddTHH:mmZ.
+        end_time (str): End time in format: yyyy-MM-dd HH:mm.
             Must be later than the start time.
         sqlhash (str, optional): The unique identifier of the SQL statement in slow log statistics.
             Used to get slow log details for a specific SQL statement.
@@ -774,7 +731,7 @@ async def describe_slow_log_records(
 
         # Make the API request
         response = client.describe_slow_log_records(request)
-        return response.to_map()
+        return response.body.to_map()
 
     except Exception as e:
         logger.error(f"Error occurred while querying slow log records: {str(e)}")
@@ -795,8 +752,8 @@ async def describe_error_logs(
     Args:
         region_id (str): The region ID of the RDS instance.
         db_instance_id (str): The ID of the RDS instance.
-        start_time (str): The start time of the query. Format: yyyy-MM-ddTHH:mmZ.
-        end_time (str): The end time of the query. Format: yyyy-MM-ddTHH:mmZ.
+        start_time (str): The start time of the query. Format: yyyy-MM-dd HH:mm.
+        end_time (str): The end time of the query. Format: yyyy-MM-dd HH:mm.
         page_size (int): The number of records per page. Range: 30~100. Default: 30.
         page_number (int): The page number. Default: 1.
     Returns:
