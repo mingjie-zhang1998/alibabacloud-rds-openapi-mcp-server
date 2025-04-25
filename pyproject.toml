@@ -11,8 +11,8 @@ dependencies = [
     "mcp[cli]>=1.6.0",
 ]
 
-license = {text = "Apache-2.0"}
-license-files = ["LICENSE", "NOTICE" ]
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 
 authors = [
     {name = "AlibabaCloud RDS"}
