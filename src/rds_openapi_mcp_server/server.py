@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-import time
+from datetime import datetime
 from typing import Dict, Any, List
 
 from alibabacloud_rds20140815 import models as rds_20140815_models
@@ -92,7 +92,8 @@ async def describe_db_instance_attribute(region_id: str, db_instance_id: str):
 
 
 @mcp.tool()
-async def describe_db_instance_performance(region_id: str, db_instance_id: str, db_type: str, perf_key: str, start_time: str, end_time: str):
+async def describe_db_instance_performance(region_id: str, db_instance_id: str, db_type: str, perf_key: str,
+                                           start_time: str, end_time: str):
     """
     Queries the performance data of an instance.
     Args:
@@ -673,7 +674,6 @@ async def describe_vswitches(
         logger.error(f"Error occurred while querying VSwitches: {str(e)}")
         raise OpenAPIError(f"Failed to query VSwitches: {str(e)}")
 
-from datetime import datetime
 
 @mcp.tool()
 async def describe_slow_log_records(
@@ -780,6 +780,62 @@ async def describe_error_logs(
     except Exception as e:
         logger.error(f"Failed to describe error logs: {str(e)}")
         raise OpenAPIError(f"Failed to describe error logs: {str(e)}")
+
+
+@mcp.tool()
+async def describe_db_instance_net_info(
+        region_id: str,
+        db_instance_ids: list[str]
+) -> list[dict]:
+    """
+    Batch retrieves network configuration details for multiple RDS instances.
+    Args:
+        region_id (str): The region ID of the RDS instance.
+        db_instance_ids (list[str]): List of DB instance identifiers (e.g., ["rm-uf6wjk5****", "db-instance-01"])
+    Returns:
+        list[dict]: A list of dictionaries containing network configuration details for each instance.
+    """
+    try:
+        client = get_rds_client(region_id)
+        db_instance_net_infos = []
+        for db_instance_id in db_instance_ids:
+            request = rds_20140815_models.DescribeDBInstanceNetInfoRequest(
+                dbinstance_id=db_instance_id
+            )
+            response = await client.describe_dbinstance_net_info_async(request)
+            db_instance_net_infos.append(response.body.to_map())
+        return db_instance_net_infos
+    except Exception as e:
+        raise e
+
+
+@mcp.tool()
+async def describe_db_instance_ip_allowlist(
+        region_id: str,
+        db_instance_ids: list[str]
+) -> list[dict]:
+    """
+    Batch retrieves IP allowlist configurations for multiple RDS instances.
+    Args:
+        region_id (str): The region ID of the RDS instance.
+        db_instance_ids (list[str]): List of DB instance identifiers (e.g., ["rm-uf6wjk5****", "db-instance-01"])
+    Returns:
+        list[dict]: A list of dictionaries containing network configuration details for each instance.
+    """
+    try:
+        client = get_rds_client(region_id)
+        db_instance_ip_allowlist = []
+        for db_instance_id in db_instance_ids:
+            request = rds_20140815_models.DescribeDBInstanceIPArrayListRequest(
+                dbinstance_id=db_instance_id
+            )
+            response = await client.describe_dbinstance_iparray_list_async(request)
+            db_instance_ip_allowlist.append(response.body.to_map())
+        return db_instance_ip_allowlist
+    except Exception as e:
+        raise e
+
+
 
 @mcp.tool()
 async def get_current_time() -> Dict[str, Any]:
