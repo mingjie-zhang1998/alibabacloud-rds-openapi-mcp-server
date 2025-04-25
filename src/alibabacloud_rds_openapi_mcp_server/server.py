@@ -1,17 +1,18 @@
 import json
 import logging
 import os
-from datetime import datetime
-from typing import Dict, Any, List
+import sys
 
+from typing import Dict, Any, List
 from alibabacloud_rds20140815 import models as rds_20140815_models
 from alibabacloud_rds20140815.client import Client as RdsClient
 from alibabacloud_tea_openapi.models import Config
 from alibabacloud_vpc20160428 import models as vpc_20160428_models
 from alibabacloud_vpc20160428.client import Client as VpcClient
 from mcp.server.fastmcp import FastMCP
-
-from alibabacloud_rds_openapi_mcp_server.utils import transform_to_iso_8601, transform_to_datetime, transform_perf_key
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
+from utils import transform_to_iso_8601, transform_to_datetime, transform_perf_key
 
 logger = logging.getLogger(__name__)
 
@@ -99,8 +100,8 @@ async def describe_db_instance_performance(region_id: str, db_instance_id: str, 
     Args:
         region_id: db instance region(e.g. cn-hangzhou)
         db_instance_id: db instance id(e.g. rm-xxx)
-        db_type: the db instance database type(e.g. mysql\pgsql\sqlserver)
-        perf_key: Performance Key(e.g. MemCpuUsage\QPSTPS\Sessions\COMDML\RowDML)
+        db_type: the db instance database type(e.g. mysql,pgsql,sqlserver)
+        perf_key: Performance Key(e.g. MemCpuUsage,QPSTPS,Sessions,COMDML,RowDML)
         start_time: start time(e.g. 2023-01-01 00:00)
         end_time: end time(e.g. 2023-01-01 00:00)
     """
@@ -311,7 +312,7 @@ async def describe_available_classes(
         instance_charge_type (str): Instance payment type. Values: Prepaid, Postpaid, Serverless.
         engine (str): Database engine type. Values: MySQL, SQLServer, PostgreSQL, MariaDB.
         engine_version (str): Database version.
-        dbinstance_storage_type (str): Storage type. Values: local_ssd\general_essd\cloud_essd\cloud_essd2\cloud_essd3
+        dbinstance_storage_type (str): Storage type. Values: local_ssd,general_essd,cloud_essd,cloud_essd2,cloud_essd3
         category (str): Instance category. Values: Basic, HighAvailability, cluster, AlwaysOn, Finance, serverless_basic, serverless_standard, serverless_ha.
         dbinstance_id (str, optional): The ID of the RDS instance.
         order_type (str, optional): Order type. Currently only supports "BUY".
@@ -394,7 +395,7 @@ async def create_db_instance(
         system_db_charset (str, optional): Character set.
         dbinstance_net_type (str, optional): Network connection type (Internet, Intranet). Default: Internet.
         category (str, optional): Instance category. Default: Basic.
-        dbinstance_storage_type (str, optional): Storage type. (e.g. local_ssd\general_essd\cloud_essd\cloud_essd2\cloud_essd3)
+        dbinstance_storage_type (str, optional): Storage type. (e.g. local_ssd,general_essd,cloud_essd,cloud_essd2,cloud_essd3)
         vpc_id (str): VPC ID.
         vswitch_id (str): VSwitch ID.
         private_ip_address (str, optional): Private IP address.
