@@ -26,4 +26,4 @@ Source = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server.git"
 
 
 [project.scripts]
-"alibaba-cloud-ops-mcp-server" = "alibaba-cloud-ops-mcp-server.rds_openapi_mcp_server.server:main"
+alibabacloud-rds-openapi-mcp-server = "rds_openapi_mcp_server.server:main"
