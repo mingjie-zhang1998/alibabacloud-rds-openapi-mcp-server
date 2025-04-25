@@ -23,7 +23,7 @@ Add the following configuration to the MCP client configuration file:
     "command": "uv",
     "args": [
       "--directory",
-      "/path/to/alibabacloud-rds-openapi-mcp-server/src/rds_openapi_mcp_server",
+      "/path/to/alibabacloud-rds-openapi-mcp-server/src/alibabacloud_rds_openapi_mcp_server",
       "run",
       "server.py"
     ],
@@ -44,7 +44,7 @@ export ALIBABA_CLOUD_ACCESS_KEY_ID=$you_access_id;
 export ALIBABA_CLOUD_ACCESS_KEY_SECRET=$you_access_key;
 
 # run mcp server
-uv --directory alibabacloud-rds-openapi-mcp-server/src/rds_openapi_mcp_server run server.py
+uv --directory alibabacloud-rds-openapi-mcp-server/src/alibabacloud_rds_openapi_mcp_server run server.py
 ```
 After run mcp server, you will see the following output:
 ```shell
@@ -67,7 +67,7 @@ Add the following configuration to the MCP client configuration file:
     "command": "uv",
     "args": [
       "--directory",
-      "/path/to/alibabacloud-rds-openapi-mcp-server/src/rds_openapi_mcp_server",
+      "/path/to/alibabacloud-rds-openapi-mcp-server/src/alibabacloud_rds_openapi_mcp_server",
       "run",
       "server.py"
     ],

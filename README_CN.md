@@ -22,7 +22,7 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
     "command": "uv",
     "args": [
       "--directory",
-      "/path/to/alibabacloud-rds-openapi-mcp-server/src/rds_openapi_mcp_server",
+      "/path/to/alibabacloud-rds-openapi-mcp-server/src/alibabacloud_rds_openapi_mcp_server",
       "run",
       "server.py"
     ],
@@ -43,7 +43,7 @@ export ALIBABA_CLOUD_ACCESS_KEY_ID=$your_access_id;  # 替换为你的access_id
 export ALIBABA_CLOUD_ACCESS_KEY_SECRET=$your_access_key;  # 替换为你的access_key
 
 # 启动MCP服务
-uv --directory alibabacloud-rds-openapi-mcp-server/src/rds_openapi_mcp_server run server.py
+uv --directory alibabacloud-rds-openapi-mcp-server/src/alibabacloud_rds_openapi_mcp_server run server.py
 ```
 成功启动后会看到以下输出：
 ```shell
@@ -65,7 +65,7 @@ remote_server = "http://127.0.0.1:8000/sse";
     "command": "uv",
     "args": [
       "--directory",
-      "/path/to/alibabacloud-rds-openapi-mcp-server/src/rds_openapi_mcp_server",
+      "/path/to/alibabacloud-rds-openapi-mcp-server/src/alibabacloud_rds_openapi_mcp_server",
       "run",
       "server.py"
     ],
