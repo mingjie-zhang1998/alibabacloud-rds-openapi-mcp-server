@@ -379,7 +379,6 @@ async def create_db_instance(
         private_ip_address: str = None,
         client_token: str = None,
         resource_group_id: str = None,
-        dedicated_host_group_id: str = None,
         tde_status: str = None,
         encryption_key: str = None,
         serverless_config: Dict[str, Any] = None
@@ -406,7 +405,6 @@ async def create_db_instance(
         private_ip_address (str, optional): Private IP address.
         client_token (str, optional): Idempotence token.
         resource_group_id (str, optional): Resource group ID.
-        dedicated_host_group_id (str, optional): Dedicated host group ID.
         tde_status (str, optional): TDE status (Enable, Disable).
         encryption_key (str, optional): Custom encryption key.
         serverless_config (Dict[str, Any], optional): Serverless instance configuration.
@@ -452,8 +450,6 @@ async def create_db_instance(
             request.client_token = client_token
         if resource_group_id:
             request.resource_group_id = resource_group_id
-        if dedicated_host_group_id:
-            request.dedicated_host_group_id = dedicated_host_group_id
         if tde_status:
             request.tde_status = tde_status
         if encryption_key:
@@ -621,8 +617,6 @@ async def describe_vswitches(
         resource_group_id: str = None,
         page_number: int = 1,
         page_size: int = 10,
-        vswitch_owner_id: int = None,
-        tags: List[Dict[str, str]] = None
 ) -> Dict[str, Any]:
     """Query VSwitch list.
 
@@ -635,8 +629,6 @@ async def describe_vswitches(
         resource_group_id (str, optional): The resource group ID of the VSwitch.
         page_number (int, optional): The page number of the list. Default: 1.
         page_size (int, optional): The number of entries per page. Maximum value: 50. Default: 10.
-        vswitch_owner_id (int, optional): The Alibaba Cloud account ID of the VSwitch owner.
-        tags (List[Dict[str, str]], optional): The tags of the resource.
 
     Returns:
         Dict[str, Any]: The response containing the list of VSwitches.
@@ -667,10 +659,6 @@ async def describe_vswitches(
             request.is_default = is_default
         if resource_group_id:
             request.resource_group_id = resource_group_id
-        if vswitch_owner_id:
-            request.vswitch_owner_id = vswitch_owner_id
-        if tags:
-            request.tag = tags
 
         # Make the API request
         response = client.describe_vswitches(request)
