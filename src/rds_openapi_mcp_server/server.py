@@ -836,6 +836,59 @@ async def describe_db_instance_ip_allowlist(
         raise e
 
 
+@mcp.tool()
+async def describe_db_instance_databases(
+        region_id: str,
+        db_instance_ids: list[str]
+) -> list[dict]:
+    """
+    Batch retrieves database information for multiple RDS instances.
+    Args:
+        region_id (str): The region ID of the RDS instance.
+        db_instance_ids (list[str]): List of DB instance identifiers (e.g., ["rm-uf6wjk5****", "db-instance-01"])
+    Returns:
+        list[dict]: A list of dictionaries containing database information for each instance.
+    """
+    try:
+        client = get_rds_client(region_id)
+        db_instance_databases = []
+        for db_instance_id in db_instance_ids:
+            request = rds_20140815_models.DescribeDatabasesRequest(
+                dbinstance_id=db_instance_id
+            )
+            response = await client.describe_databases_async(request)
+            db_instance_databases.append(response.body.to_map())
+        return db_instance_databases
+    except Exception as e:
+        raise e
+
+
+@mcp.tool()
+async def describe_db_instance_accounts(
+        region_id: str,
+        db_instance_ids: list[str]
+) -> list[dict]:
+    """
+    Batch retrieves account information for multiple RDS instances.
+    Args:
+        region_id (str): The region ID of the RDS instance.
+        db_instance_ids (list[str]): List of DB instance identifiers (e.g., ["rm-uf6wjk5****", "db-instance-01"])
+    Returns:
+        list[dict]: A list of dictionaries containing account information for each instance.
+    """
+    try:
+        client = get_rds_client(region_id)
+        db_instance_accounts = []
+        for db_instance_id in db_instance_ids:
+            request = rds_20140815_models.DescribeAccountsRequest(
+                dbinstance_id=db_instance_id
+            )
+            response = await client.describe_accounts_async(request)
+            db_instance_accounts.append(response.body.to_map())
+        return db_instance_accounts
+    except Exception as e:
+        raise e
+
 
 @mcp.tool()
 async def get_current_time() -> Dict[str, Any]:

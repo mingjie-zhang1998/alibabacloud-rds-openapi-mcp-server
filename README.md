@@ -88,6 +88,8 @@ Add the following configuration to the MCP client configuration file:
 * `describe_error_logs`: Queries the error log of an instance.
 * `describe_db_instance_net_info`: Batch retrieves network configuration details for multiple RDS instances.
 * `describe_db_instance_ip_allowlist`: Batch retrieves IP allowlist configurations for multiple RDS instances.
+* `describe_db_instance_databases`: Batch retrieves database information for multiple RDS instances.
+* `describe_db_instance_accounts`: Batch retrieves account information for multiple RDS instances.
 * `describe_available_classes`: Query available instance classes and storage ranges.
 * `describe_available_zones`: Query available zones for RDS instances.
 * `describe_vpcs`: Query VPC list.
