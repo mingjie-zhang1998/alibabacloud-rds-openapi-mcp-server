@@ -41,11 +41,20 @@ def transform_to_datetime(s: str):
     return dt
 
 
-def transform_perf_key(db_type: str, perf_key: str):
+def transform_perf_key(db_type: str, perf_keys: list[str]):
     perf_key_after_transform = []
-    for key in perf_key.split(","):
+    for key in perf_keys:
         if key in PERF_KEYS[db_type.lower()]:
             perf_key_after_transform.extend(PERF_KEYS[db_type.lower()][key])
         else:
             perf_key_after_transform.append(key)
-    return PERF_KEYS[db_type.lower()][perf_key]
+    return perf_key_after_transform
+
+
+def compress_json_array(json_array: list[dict]):
+    if not json_array or len(json_array) == 0:
+        return ""
+    compress_str = ";".join(json_array[0].keys())
+    for item in json_array:
+        compress_str += "|" + ";".join([str(item[key]) for key in json_array[0].keys()])
+    return compress_str

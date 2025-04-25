@@ -13,7 +13,7 @@ from alibabacloud_vpc20160428.client import Client as VpcClient
 from mcp.server.fastmcp import FastMCP
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
-from utils import transform_to_iso_8601, transform_to_datetime, transform_perf_key
+from utils import transform_to_iso_8601, transform_to_datetime, transform_perf_key, compress_json_array
 
 logger = logging.getLogger(__name__)
 
@@ -94,15 +94,19 @@ async def describe_db_instance_attribute(region_id: str, db_instance_id: str):
 
 
 @mcp.tool()
-async def describe_db_instance_performance(region_id: str, db_instance_id: str, db_type: str, perf_key: str,
-                                           start_time: str, end_time: str):
+async def describe_db_instance_performance(region_id: str,
+                                           db_instance_id: str,
+                                           db_type: str,
+                                           perf_keys: list[str],
+                                           start_time: str,
+                                           end_time: str):
     """
     Queries the performance data of an instance.
     Args:
         region_id: db instance region(e.g. cn-hangzhou)
         db_instance_id: db instance id(e.g. rm-xxx)
         db_type: the db instance database type(e.g. mysql,pgsql,sqlserver)
-        perf_key: Performance Key(e.g. MemCpuUsage,QPSTPS,Sessions,COMDML,RowDML)
+        perf_keys: Performance Key  (e.g. ["MemCpuUsage", "QPSTPS", "Sessions", "COMDML", "RowDML"])
         start_time: start time(e.g. 2023-01-01 00:00)
         end_time: end time(e.g. 2023-01-01 00:00)
     """
@@ -110,7 +114,7 @@ async def describe_db_instance_performance(region_id: str, db_instance_id: str, 
         start_time = transform_to_datetime(start_time)
         end_time = transform_to_datetime(end_time)
         client = get_rds_client(region_id)
-        perf_key = transform_perf_key(db_type, perf_key)
+        perf_key = transform_perf_key(db_type, perf_keys)
         if not perf_key:
             raise OpenAPIError(f"Unsupported perf_key: {perf_key}")
         request = rds_20140815_models.DescribeDBInstancePerformanceRequest(
@@ -122,7 +126,7 @@ async def describe_db_instance_performance(region_id: str, db_instance_id: str, 
         response = client.describe_dbinstance_performance(request)
         responses = []
         for perf_key in response.body.performance_keys.performance_key:
-            perf_key_info = f"""Key={perf_key.key}; Unit={perf_key.unit}; ValueFormat={perf_key.value_format}; Values={"|".join([f"{value.date} {value.value}" for value in perf_key.values.performance_value])}"""
+            perf_key_info = f"""Key={perf_key.key}; Unit={perf_key.unit}; ValueFormat={perf_key.value_format}; Values={compress_json_array([item.to_map() for item in perf_key.values.performance_value])}"""
             responses.append(perf_key_info)
         return responses
     except Exception as e:
