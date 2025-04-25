@@ -11,7 +11,7 @@ from alibabacloud_vpc20160428 import models as vpc_20160428_models
 from alibabacloud_vpc20160428.client import Client as VpcClient
 from mcp.server.fastmcp import FastMCP
 
-from utils import transform_to_iso_8601, transform_to_datetime, transform_perf_key
+from alibabacloud_rds_openapi_mcp_server.utils import transform_to_iso_8601, transform_to_datetime, transform_perf_key
 
 logger = logging.getLogger(__name__)
 
