@@ -10,3 +10,20 @@ dependencies = [
     "httpx>=0.28.1",
     "mcp[cli]>=1.6.0",
 ]
+
+license = {text = "Apache-2.0"}
+license-files = ["LICENSE", "NOTICE" ]
+
+authors = [
+    {name = "AlibabaCloud RDS"}
+]
+
+[project.urls]
+Homepage = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server"
+Documentation = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server/"
+Source = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server.git"
+"Bug Tracker" = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server/issues"
+
+
+[project.scripts]
+"alibaba-cloud-ops-mcp-server" = "alibaba-cloud-ops-mcp-server.rds_openapi_mcp_server.server:main"
