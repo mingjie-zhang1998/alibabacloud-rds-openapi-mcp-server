@@ -8,23 +8,14 @@ RDS OpenAPI MCP服务。
 3. 具有阿里云RDS服务访问权限的账号凭证
 
 ## 快速开始
-### 下载
-从Github克隆仓库
-```shell
-git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
-```
-
 ### 使用[cherry-studio](https://github.com/CherryHQ/cherry-studio)（推荐）
 根据[Cherry-Studio文档](https://docs.cherry-ai.com/advanced-basic/mcp/install)安装MCP环境后配置使用RDS MCP。 MCP配置文件格式如下：
 ```json
 "mcpServers": {
   "rds-openapi-mcp-server": {
-    "command": "uv",
+    "command": "uvx",
     "args": [
-      "--directory",
-      "/path/to/alibabacloud-rds-openapi-mcp-server/src/alibabacloud_rds_openapi_mcp_server",
-      "run",
-      "server.py"
+      "alibabacloud-rds-openapi-mcp-server@latest"
     ],
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
@@ -43,7 +34,7 @@ export ALIBABA_CLOUD_ACCESS_KEY_ID=$your_access_id;  # 替换为你的access_id
 export ALIBABA_CLOUD_ACCESS_KEY_SECRET=$your_access_key;  # 替换为你的access_key
 
 # 启动MCP服务
-uv --directory alibabacloud-rds-openapi-mcp-server/src/alibabacloud_rds_openapi_mcp_server run server.py
+uvx alibabacloud-rds-openapi-mcp-server@latest
 ```
 成功启动后会看到以下输出：
 ```shell
@@ -58,6 +49,10 @@ remote_server = "http://127.0.0.1:8000/sse";
 ```
 
 ### 使用Claude
+从Github克隆仓库
+```shell
+git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
+```
 在MCP客户端配置文件中添加：
 ```json
 "mcpServers": {

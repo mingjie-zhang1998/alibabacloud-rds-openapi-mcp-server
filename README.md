@@ -9,23 +9,15 @@ MCP server for RDS Services via OPENAPI
 3. Alibaba Cloud credentials with access to Alibaba Cloud RDS services
 
 ## Quick Start
-### Download
-Download from Github
-```shell
-git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
-```
 ### Using [cherry-studio](https://github.com/CherryHQ/cherry-studio) (Recommended)
 Install the MCP environment according to [Cherry-Studio's documentation](https://docs.cherry-ai.com/advanced-basic/mcp/install), then configure and use RDS MCP.
 Add the following configuration to the MCP client configuration file:
 ```json
 "mcpServers": {
   "rds-openapi-mcp-server": {
-    "command": "uv",
+    "command": "uvx",
     "args": [
-      "--directory",
-      "/path/to/alibabacloud-rds-openapi-mcp-server/src/alibabacloud_rds_openapi_mcp_server",
-      "run",
-      "server.py"
+      "alibabacloud-rds-openapi-mcp-server@latest"
     ],
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
@@ -44,7 +36,7 @@ export ALIBABA_CLOUD_ACCESS_KEY_ID=$you_access_id;
 export ALIBABA_CLOUD_ACCESS_KEY_SECRET=$you_access_key;
 
 # run mcp server
-uv --directory alibabacloud-rds-openapi-mcp-server/src/alibabacloud_rds_openapi_mcp_server run server.py
+uvx alibabacloud-rds-openapi-mcp-server@latest
 ```
 After run mcp server, you will see the following output:
 ```shell
@@ -60,6 +52,10 @@ remote_server = "http://127.0.0.1:8000/sse";
 
 
 ### Using Claude
+Download from Github
+```shell
+git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
+```
 Add the following configuration to the MCP client configuration file:
 ```json
 "mcpServers": {
