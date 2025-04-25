@@ -914,6 +914,10 @@ async def get_current_time() -> Dict[str, Any]:
         raise Exception(f"Failed to get the current time: {str(e)}")
 
 
+def main():
+    mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'stdio'))
+
+
 if __name__ == '__main__':
     # Initialize and run the server
-    mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'stdio'))
+    main()
