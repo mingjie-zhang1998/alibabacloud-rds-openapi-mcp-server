@@ -86,6 +86,7 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 * `describe_db_instance_accounts`: 批量查询实例的账号信息
 * `describe_available_classes`: 查询可用实例规格和存储范围
 * `describe_available_zones`: 查询RDS可用区
+* `describe_bills`: 批量查询实例账单信息.
 * `describe_vpcs`: 查询VPC列表
 * `describe_vswitches`: 查询虚拟交换机列表
 * `describe_slow_log_records`: 查询RDS慢日志记录

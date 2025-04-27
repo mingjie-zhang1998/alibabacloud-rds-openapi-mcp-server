@@ -1,5 +1,10 @@
+import os
 from datetime import datetime, timezone
 
+from alibabacloud_bssopenapi20171214.client import Client as BssOpenApi20171214Client
+from alibabacloud_rds20140815.client import Client as RdsClient
+from alibabacloud_tea_openapi.models import Config
+from alibabacloud_vpc20160428.client import Client as VpcClient
 
 PERF_KEYS = {
     "mysql": {
@@ -8,7 +13,10 @@ PERF_KEYS = {
         "Sessions": ["MySQL_Sessions"],
         "COMDML": ["MySQL_COMDML"],
         "RowDML": ["MySQL_RowDML"],
-        "SpaceUsage": ["MySQL_DetailedSpaceUsage"]
+        "SpaceUsage": ["MySQL_DetailedSpaceUsage"],
+        "ThreadStatus": ["MySQL_ThreadStatus"],
+        "MBPS": ["MySQL_MBPS"],
+        "DetailedSpaceUsage": ["MySQL_DetailedSpaceUsage"]
     },
     "pgsql": {
         "MemCpuUsage": ["MemoryUsage", "CpuUsage"],
@@ -16,7 +24,10 @@ PERF_KEYS = {
         "Sessions": ["PgSQL_Session"],
         "COMDML": ["PgSQL_COMDML"],
         "RowDML": ["PolarDBRowDML"],
-        "SpaceUsage": ["PgSQL_SpaceUsage"]
+        "SpaceUsage": ["PgSQL_SpaceUsage"],
+        "ThreadStatus": [],
+        "MBPS": [],
+        "DetailedSpaceUsage": ["SQLServer_DetailedSpaceUsage"]
     },
     "sqlserver": {
         "MemCpuUsage": ["SQLServer_CPUUsage"],
@@ -25,9 +36,13 @@ PERF_KEYS = {
         "COMDML": [],
         "RowDML": [],
         "SpaceUsage": ["SQLServer_DetailedSpaceUsage"],
+        "ThreadStatus": [],
+        "MBPS": [],
+        "DetailedSpaceUsage": ["PgSQL_SpaceUsage"]
     }
 
 }
+
 
 def transform_to_iso_8601(dt: datetime, timespec: str):
     return dt.astimezone(timezone.utc).isoformat(timespec=timespec).replace("+00:00", "Z")
@@ -41,11 +56,66 @@ def transform_to_datetime(s: str):
     return dt
 
 
-def transform_perf_key(db_type: str, perf_key: str):
+def transform_perf_key(db_type: str, perf_keys: list[str]):
     perf_key_after_transform = []
-    for key in perf_key.split(","):
+    for key in perf_keys:
         if key in PERF_KEYS[db_type.lower()]:
             perf_key_after_transform.extend(PERF_KEYS[db_type.lower()][key])
         else:
             perf_key_after_transform.append(key)
-    return PERF_KEYS[db_type.lower()][perf_key]
+    return perf_key_after_transform
+
+
+def compress_json_array(json_array: list[dict]):
+    if not json_array or len(json_array) == 0:
+        return ""
+    compress_str = ";".join(json_array[0].keys())
+    for item in json_array:
+        compress_str += "|" + ";".join([str(item[key] if key in item else "") for key in json_array[0].keys()])
+    return compress_str
+
+
+def get_rds_client(region_id: str):
+    config = Config(
+        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
+        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
+        region_id=region_id,
+        protocol="https",
+        connect_timeout=10 * 1000,
+        read_timeout=300 * 1000
+    )
+    client = RdsClient(config)
+    return client
+
+
+def get_vpc_client(region_id: str) -> VpcClient:
+    """Get VPC client instance.
+
+    Args:
+        region_id: The region ID for the VPC client.
+
+    Returns:
+        VpcClient: The VPC client instance for the specified region.
+    """
+    config = Config(
+        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
+        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
+        region_id=region_id,
+        protocol="https",
+        connect_timeout=10 * 1000,
+        read_timeout=300 * 1000
+    )
+    return VpcClient(config)
+
+
+def get_bill_client(region_id: str):
+    config = Config(
+        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
+        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
+        region_id=region_id,
+        protocol="https",
+        connect_timeout=10 * 1000,
+        read_timeout=300 * 1000
+    )
+    client = BssOpenApi20171214Client(config)
+    return client
