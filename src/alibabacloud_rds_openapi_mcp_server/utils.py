@@ -79,6 +79,7 @@ def get_rds_client(region_id: str):
     config = Config(
         access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
         access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
+        security_token=os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN'),
         region_id=region_id,
         protocol="https",
         connect_timeout=10 * 1000,
@@ -100,6 +101,7 @@ def get_vpc_client(region_id: str) -> VpcClient:
     config = Config(
         access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
         access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
+        security_token=os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN'),
         region_id=region_id,
         protocol="https",
         connect_timeout=10 * 1000,
@@ -112,6 +114,7 @@ def get_bill_client(region_id: str):
     config = Config(
         access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
         access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
+        security_token=os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN'),
         region_id=region_id,
         protocol="https",
         connect_timeout=10 * 1000,
