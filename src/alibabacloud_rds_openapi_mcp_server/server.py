@@ -870,6 +870,52 @@ async def describe_db_instance_accounts(
     except Exception as e:
         raise e
 
+@mcp.tool()
+async def describe_db_instance_parameters(
+        region_id: str,
+        db_instance_ids: list[str],
+        paramters: list[str] = None
+) -> dict[str, dict[str, Any]]:
+    """
+    Batch retrieves parameter information for multiple RDS instances.
+    Args:
+        region_id: The region ID of the RDS instance.
+        db_instance_ids: List of DB instance identifiers (e.g., ["rm-uf6wjk5****", "db-instance-01"])
+        paramters: List of parameter names (e.g., ["max_connections", "innodb_buffer_pool_size"])
+    Returns:
+        list[dict]: A list of dictionaries containing parameter information(ParamGroupInfo,ConfigParameters,RunningParameters) foreach instance.
+    """
+    try:
+        client = get_rds_client(region_id)
+        db_instance_parameters = {}
+        for db_instance_id in db_instance_ids:
+            request = rds_20140815_models.DescribeParametersRequest(
+                dbinstance_id=db_instance_id
+            )
+            response = await client.describe_parameters_async(request)
+            if paramters:
+                response.body.config_parameters.dbinstance_parameter = [
+                    config_parameter for config_parameter in response.body.config_parameters.dbinstance_parameter
+                    if config_parameter.parameter_name in paramters
+                ]
+                response.body.running_parameters.dbinstance_parameter = [
+                    running_parameter for running_parameter in response.body.running_parameters.dbinstance_parameter
+                    if running_parameter.parameter_name in paramters
+                ]
+
+                db_instance_parameters[db_instance_id] = {
+                    "ParamGroupInfo": response.body.param_group_info.to_map(),
+                    "ConfigParameters": compress_json_array([
+                        config_parameter.to_map() for config_parameter in response.body.config_parameters.dbinstance_parameter
+                    ]),
+                    "RunningParameters": compress_json_array([
+                        running_parameter.to_map() for running_parameter in response.body.running_parameters.dbinstance_parameter
+                    ])
+                }
+        return db_instance_parameters
+    except Exception as e:
+        raise e
+
 
 @mcp.tool()
 async def describe_bills(

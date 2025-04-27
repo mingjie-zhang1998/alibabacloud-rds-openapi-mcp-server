@@ -95,6 +95,7 @@ Add the following configuration to the MCP client configuration file:
 * `describe_vpcs`: Query VPC list.
 * `describe_vswitches`: Query VSwitch list.
 * `describe_slow_log_records`: Query slow log records for an RDS instance.
+* `describe_db_instance_parameters`: Batch retrieves parameter information for multiple RDS instances.
 * `modify_parameter`: Modify RDS instance parameters.
 * `modify_db_instance_spec`: Modify RDS instance specifications.
 * `get_current_time`: Get the current time.

@@ -93,6 +93,7 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 * `describe_vpcs`: 查询VPC列表
 * `describe_vswitches`: 查询虚拟交换机列表
 * `describe_slow_log_records`: 查询RDS慢日志记录
+* `describe_db_instance_parameters`: 批量查询实例参数信息.
 * `modify_parameter`: 修改RDS实例参数
 * `modify_db_instance_spec`: 调整RDS实例规格
 * `get_current_time`: 获取当前时间
