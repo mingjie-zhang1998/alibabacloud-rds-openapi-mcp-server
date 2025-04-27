@@ -13,7 +13,10 @@ PERF_KEYS = {
         "Sessions": ["MySQL_Sessions"],
         "COMDML": ["MySQL_COMDML"],
         "RowDML": ["MySQL_RowDML"],
-        "SpaceUsage": ["MySQL_DetailedSpaceUsage"]
+        "SpaceUsage": ["MySQL_DetailedSpaceUsage"],
+        "ThreadStatus": ["MySQL_ThreadStatus"],
+        "MBPS": ["MySQL_MBPS"],
+        "DetailedSpaceUsage": ["MySQL_DetailedSpaceUsage"]
     },
     "pgsql": {
         "MemCpuUsage": ["MemoryUsage", "CpuUsage"],
@@ -21,7 +24,10 @@ PERF_KEYS = {
         "Sessions": ["PgSQL_Session"],
         "COMDML": ["PgSQL_COMDML"],
         "RowDML": ["PolarDBRowDML"],
-        "SpaceUsage": ["PgSQL_SpaceUsage"]
+        "SpaceUsage": ["PgSQL_SpaceUsage"],
+        "ThreadStatus": [],
+        "MBPS": [],
+        "DetailedSpaceUsage": ["SQLServer_DetailedSpaceUsage"]
     },
     "sqlserver": {
         "MemCpuUsage": ["SQLServer_CPUUsage"],
@@ -30,6 +36,9 @@ PERF_KEYS = {
         "COMDML": [],
         "RowDML": [],
         "SpaceUsage": ["SQLServer_DetailedSpaceUsage"],
+        "ThreadStatus": [],
+        "MBPS": [],
+        "DetailedSpaceUsage": ["PgSQL_SpaceUsage"]
     }
 
 }

@@ -78,10 +78,25 @@ async def describe_db_instance_performance(region_id: str,
         region_id: db instance region(e.g. cn-hangzhou)
         db_instance_id: db instance id(e.g. rm-xxx)
         db_type: the db instance database type(e.g. mysql,pgsql,sqlserver)
-        perf_keys: Performance Key  (e.g. ["MemCpuUsage", "QPSTPS", "Sessions", "COMDML", "RowDML"])
+        perf_keys: Performance Key  (e.g. ["MemCpuUsage", "QPSTPS", "Sessions", "COMDML", "RowDML", "ThreadStatus", "MBPS", "DetailedSpaceUsage"])
         start_time: start time(e.g. 2023-01-01 00:00)
         end_time: end time(e.g. 2023-01-01 00:00)
     """
+    def _compress_performance(performance_value, max_items=10):
+        if len(performance_value) > max_items:
+            result = []
+            offset = len(performance_value) / 10
+            for i in range(0, len(performance_value), int(offset)):
+                _item = None
+                for j in range(i, min(i + int(offset), len(performance_value))):
+                    if _item is None or sum([float(v) for v in performance_value[j].value.split('&')]) > sum([float(v) for v in _item.value.split('&')]):
+                        _item = performance_value[j]
+                else:
+                    result.append(_item)
+            return result
+        else:
+            return performance_value
+
     try:
         start_time = transform_to_datetime(start_time)
         end_time = transform_to_datetime(end_time)
@@ -98,7 +113,7 @@ async def describe_db_instance_performance(region_id: str,
         response = client.describe_dbinstance_performance(request)
         responses = []
         for perf_key in response.body.performance_keys.performance_key:
-            perf_key_info = f"""Key={perf_key.key}; Unit={perf_key.unit}; ValueFormat={perf_key.value_format}; Values={compress_json_array([item.to_map() for item in perf_key.values.performance_value])}"""
+            perf_key_info = f"""Key={perf_key.key}; Unit={perf_key.unit}; ValueFormat={perf_key.value_format}; Values={compress_json_array([item.to_map() for item in _compress_performance(perf_key.values.performance_value)])}"""
             responses.append(perf_key_info)
         return responses
     except Exception as e:
