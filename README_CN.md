@@ -10,7 +10,7 @@ RDS OpenAPI MCP服务。
 ## 快速开始
 ### 使用[cherry-studio](https://github.com/CherryHQ/cherry-studio)（推荐）
 根据[Cherry-Studio文档](https://docs.cherry-ai.com/advanced-basic/mcp/install)安装MCP环境后配置使用RDS MCP。 MCP配置文件格式如下：
-```json
+```json5
 "mcpServers": {
   "rds-openapi-mcp-server": {
     "command": "uvx",
@@ -20,8 +20,7 @@ RDS OpenAPI MCP服务。
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
       "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
-      // 可选项，使用sts token鉴权时填写
-      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token"
+      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token" // 可选项，使用sts token鉴权时填写
     }
   }
 }
@@ -57,7 +56,7 @@ remote_server = "http://127.0.0.1:8000/sse";
 git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 ```
 在MCP客户端配置文件中添加：
-```json
+```json5
 "mcpServers": {
   "rds-openapi-mcp-server": {
     "command": "uv",
@@ -70,8 +69,7 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
       "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
-      // 可选项，使用sts token鉴权时填写
-      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token"
+      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token" // 可选项，使用sts token鉴权时填写
 }
   }
 }

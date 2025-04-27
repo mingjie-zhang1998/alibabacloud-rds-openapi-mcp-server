@@ -12,7 +12,7 @@ MCP server for RDS Services via OPENAPI
 ### Using [cherry-studio](https://github.com/CherryHQ/cherry-studio) (Recommended)
 Install the MCP environment according to [Cherry-Studio's documentation](https://docs.cherry-ai.com/advanced-basic/mcp/install), then configure and use RDS MCP.
 Add the following configuration to the MCP client configuration file:
-```json
+```json5
 "mcpServers": {
   "rds-openapi-mcp-server": {
     "command": "uvx",
@@ -22,8 +22,7 @@ Add the following configuration to the MCP client configuration file:
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
       "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
-      // optional, required when using STS Token
-      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token"
+      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token" // optional, required when using STS Token 
     }
   }
 }
@@ -36,8 +35,7 @@ Set you env and run mcp server.
 export SERVER_TRANSPORT=sse;
 export ALIBABA_CLOUD_ACCESS_KEY_ID=$you_access_id;
 export ALIBABA_CLOUD_ACCESS_KEY_SECRET=$you_access_key;
-# optional, required when using STS Token
-export ALIBABA_CLOUD_SECURITY_TOKEN=$you_sts_security_token 
+export ALIBABA_CLOUD_SECURITY_TOKEN=$you_sts_security_token; # optional, required when using STS Token 
 
 # run mcp server
 uvx alibabacloud-rds-openapi-mcp-server@latest
@@ -61,7 +59,7 @@ Download from Github
 git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 ```
 Add the following configuration to the MCP client configuration file:
-```json
+```json5
 "mcpServers": {
   "rds-openapi-mcp-server": {
     "command": "uv",
@@ -74,8 +72,7 @@ Add the following configuration to the MCP client configuration file:
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
       "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
-      // optional, required when using STS Token
-      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token" 
+      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token"  // optional, required when using STS Token
     }
   }
 }
