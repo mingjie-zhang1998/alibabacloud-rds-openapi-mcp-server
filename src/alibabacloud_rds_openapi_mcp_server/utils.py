@@ -1,5 +1,10 @@
+import os
 from datetime import datetime, timezone
 
+from alibabacloud_bssopenapi20171214.client import Client as BssOpenApi20171214Client
+from alibabacloud_rds20140815.client import Client as RdsClient
+from alibabacloud_tea_openapi.models import Config
+from alibabacloud_vpc20160428.client import Client as VpcClient
 
 PERF_KEYS = {
     "mysql": {
@@ -29,6 +34,7 @@ PERF_KEYS = {
 
 }
 
+
 def transform_to_iso_8601(dt: datetime, timespec: str):
     return dt.astimezone(timezone.utc).isoformat(timespec=timespec).replace("+00:00", "Z")
 
@@ -56,5 +62,51 @@ def compress_json_array(json_array: list[dict]):
         return ""
     compress_str = ";".join(json_array[0].keys())
     for item in json_array:
-        compress_str += "|" + ";".join([str(item[key]) for key in json_array[0].keys()])
+        compress_str += "|" + ";".join([str(item[key] if key in item else "") for key in json_array[0].keys()])
     return compress_str
+
+
+def get_rds_client(region_id: str):
+    config = Config(
+        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
+        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
+        region_id=region_id,
+        protocol="https",
+        connect_timeout=10 * 1000,
+        read_timeout=300 * 1000
+    )
+    client = RdsClient(config)
+    return client
+
+
+def get_vpc_client(region_id: str) -> VpcClient:
+    """Get VPC client instance.
+
+    Args:
+        region_id: The region ID for the VPC client.
+
+    Returns:
+        VpcClient: The VPC client instance for the specified region.
+    """
+    config = Config(
+        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
+        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
+        region_id=region_id,
+        protocol="https",
+        connect_timeout=10 * 1000,
+        read_timeout=300 * 1000
+    )
+    return VpcClient(config)
+
+
+def get_bill_client(region_id: str):
+    config = Config(
+        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
+        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
+        region_id=region_id,
+        protocol="https",
+        connect_timeout=10 * 1000,
+        read_timeout=300 * 1000
+    )
+    client = BssOpenApi20171214Client(config)
+    return client

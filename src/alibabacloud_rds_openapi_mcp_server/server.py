@@ -3,54 +3,26 @@ import logging
 import os
 import sys
 from datetime import datetime
-
 from typing import Dict, Any, List
+
+from alibabacloud_bssopenapi20171214 import models as bss_open_api_20171214_models
 from alibabacloud_rds20140815 import models as rds_20140815_models
-from alibabacloud_rds20140815.client import Client as RdsClient
-from alibabacloud_tea_openapi.models import Config
 from alibabacloud_vpc20160428 import models as vpc_20160428_models
-from alibabacloud_vpc20160428.client import Client as VpcClient
 from mcp.server.fastmcp import FastMCP
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
-from utils import transform_to_iso_8601, transform_to_datetime, transform_perf_key, compress_json_array
+from utils import (transform_to_iso_8601,
+                   transform_to_datetime,
+                   transform_perf_key,
+                   compress_json_array,
+                   get_rds_client,
+                   get_vpc_client,
+                   get_bill_client)
 
 logger = logging.getLogger(__name__)
 
 mcp = FastMCP("Alibaba Cloud RDS OPENAPI")
-
-
-def get_rds_client(region_id: str):
-    config = Config(
-        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
-        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
-        region_id=region_id,
-        protocol="https",
-        connect_timeout=10 * 1000,
-        read_timeout=300 * 1000
-    )
-    client = RdsClient(config)
-    return client
-
-
-def get_vpc_client(region_id: str) -> VpcClient:
-    """Get VPC client instance.
-
-    Args:
-        region_id: The region ID for the VPC client.
-
-    Returns:
-        VpcClient: The VPC client instance for the specified region.
-    """
-    config = Config(
-        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
-        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
-        region_id=region_id,
-        protocol="https",
-        connect_timeout=10 * 1000,
-        read_timeout=300 * 1000
-    )
-    return VpcClient(config)
 
 
 class OpenAPIError(Exception):
@@ -880,6 +852,48 @@ async def describe_db_instance_accounts(
             response = await client.describe_accounts_async(request)
             db_instance_accounts.append(response.body.to_map())
         return db_instance_accounts
+    except Exception as e:
+        raise e
+
+
+@mcp.tool()
+async def describe_bills(
+        billing_cycles: list[str],
+        db_instance_id: str = None
+) -> dict[str, Any]:
+    """
+    Query the consumption summary of all product instances or billing items for a user within a specific billing period.
+    Args:
+        billing_cycles: bill cycle YYYY－MM, e.g. 2020-03
+        db_instance_id: DB instance id (e.g., "rm-xxx")
+    Returns:
+        str: billing information.
+    """
+    try:
+        client = get_bill_client("cn-hangzhou")
+        res = {}
+        for billing_cycle in billing_cycles:
+            has_next_token = True
+            next_token = None
+            items = []
+
+            while has_next_token:
+                describe_instance_bill_request = bss_open_api_20171214_models.DescribeInstanceBillRequest(
+                    billing_cycle=billing_cycle,
+                    product_code='rds',
+                    next_token=next_token
+                )
+                if db_instance_id:
+                    describe_instance_bill_request.db_instance_id = db_instance_id
+
+                response = client.describe_instance_bill(describe_instance_bill_request)
+                if not response.body.data:
+                    break
+                next_token = response.body.data.next_token
+                has_next_token = next_token is not None and next_token.strip() != ""
+                items.extend(response.body.data.items)
+            res[billing_cycle] = compress_json_array([item.to_map() for item in items])
+        return res
     except Exception as e:
         raise e
 

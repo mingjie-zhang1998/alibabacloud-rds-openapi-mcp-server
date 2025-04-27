@@ -5,6 +5,7 @@ description = "MCP server for RDS Services via OPENAPI."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "alibabacloud-bssopenapi20171214>=5.0.0",
     "alibabacloud-rds20140815>=11.0.0",
     "alibabacloud-vpc20160428>=6.11.4",
     "httpx>=0.28.1",

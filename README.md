@@ -88,6 +88,7 @@ Add the following configuration to the MCP client configuration file:
 * `describe_db_instance_accounts`: Batch retrieves account information for multiple RDS instances.
 * `describe_available_classes`: Query available instance classes and storage ranges.
 * `describe_available_zones`: Query available zones for RDS instances.
+* `describe_bills`: Query the consumption summary of all product instances or billing items for a user within a specific billing period.
 * `describe_vpcs`: Query VPC list.
 * `describe_vswitches`: Query VSwitch list.
 * `describe_slow_log_records`: Query slow log records for an RDS instance.
