@@ -21,7 +21,9 @@ Add the following configuration to the MCP client configuration file:
     ],
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
-      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key"
+      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
+      // optional, required when using STS Token
+      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token"
     }
   }
 }
@@ -34,6 +36,8 @@ Set you env and run mcp server.
 export SERVER_TRANSPORT=sse;
 export ALIBABA_CLOUD_ACCESS_KEY_ID=$you_access_id;
 export ALIBABA_CLOUD_ACCESS_KEY_SECRET=$you_access_key;
+# optional, required when using STS Token
+export ALIBABA_CLOUD_SECURITY_TOKEN=$you_sts_security_token 
 
 # run mcp server
 uvx alibabacloud-rds-openapi-mcp-server@latest
@@ -69,7 +73,9 @@ Add the following configuration to the MCP client configuration file:
     ],
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
-      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key"
+      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
+      // optional, required when using STS Token
+      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token" 
     }
   }
 }

@@ -19,7 +19,9 @@ RDS OpenAPI MCP服务。
     ],
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
-      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key"
+      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
+      // 可选项，使用sts token鉴权时填写
+      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token"
     }
   }
 }
@@ -32,6 +34,7 @@ RDS OpenAPI MCP服务。
 export SERVER_TRANSPORT=sse;
 export ALIBABA_CLOUD_ACCESS_KEY_ID=$your_access_id;  # 替换为你的access_id
 export ALIBABA_CLOUD_ACCESS_KEY_SECRET=$your_access_key;  # 替换为你的access_key
+export ALIBABA_CLOUD_SECURITY_TOKEN=$your_sts_security_token; # 可选项，使用sts token鉴权时填写
 
 # 启动MCP服务
 uvx alibabacloud-rds-openapi-mcp-server@latest
@@ -66,8 +69,10 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
     ],
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
-      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key"
-    }
+      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
+      // 可选项，使用sts token鉴权时填写
+      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token"
+}
   }
 }
 ```
