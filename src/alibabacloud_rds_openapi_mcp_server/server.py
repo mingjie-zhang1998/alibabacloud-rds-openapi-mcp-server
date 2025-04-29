@@ -920,13 +920,15 @@ async def describe_db_instance_parameters(
 @mcp.tool()
 async def describe_bills(
         billing_cycles: list[str],
-        db_instance_id: str = None
+        db_instance_id: str = None,
+        is_billing_item: bool = False
 ) -> dict[str, Any]:
     """
     Query the consumption summary of all product instances or billing items for a user within a specific billing period.
     Args:
         billing_cycles: bill cycle YYYY－MM, e.g. 2020-03
         db_instance_id: DB instance id (e.g., "rm-xxx")
+        is_billing_item: Whether to pull data according to the billing item dimension.
     Returns:
         str: billing information.
     """
@@ -942,6 +944,7 @@ async def describe_bills(
                 describe_instance_bill_request = bss_open_api_20171214_models.DescribeInstanceBillRequest(
                     billing_cycle=billing_cycle,
                     product_code='rds',
+                    is_billing_item=is_billing_item,
                     next_token=next_token
                 )
                 if db_instance_id:
@@ -953,7 +956,29 @@ async def describe_bills(
                 next_token = response.body.data.next_token
                 has_next_token = next_token is not None and next_token.strip() != ""
                 items.extend(response.body.data.items)
-            res[billing_cycle] = compress_json_array([item.to_map() for item in items])
+            item_filters = []
+            for item in items:
+                if db_instance_id is None or db_instance_id in item.instance_id.split(";"):
+                    item_filters.append(
+                        {
+                            "Item": item.item,
+                            "AfterDiscountAmount": item.after_discount_amount,
+                            "InstanceID": item.instance_id,
+                            "BillingDate": item.billing_date,
+                            "InvoiceDiscount": item.invoice_discount,
+                            "SubscriptionType": item.subscription_type,
+                            "PretaxGrossAmount": item.pretax_gross_amount,
+                            "Currency": item.currency,
+                            "CommodityCode": item.commodity_code,
+                            "CostUnit": item.cost_unit,
+                            "NickName": item.nick_name,
+                            "PretaxAmount": item.pretax_amount,
+                            "BillingItem": item.billing_item,
+                            "BillingItemPriceUnit": item.list_price_unit,
+                            "BillingItemUsage": item.usage,
+                        }
+                    )
+            res[billing_cycle] = compress_json_array(item_filters)
         return res
     except Exception as e:
         raise e
