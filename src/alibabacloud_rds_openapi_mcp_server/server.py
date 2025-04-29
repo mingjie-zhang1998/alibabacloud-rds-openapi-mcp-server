@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sys
+import csv
 from datetime import datetime
 from typing import Dict, Any, List
 
@@ -15,7 +16,7 @@ sys.path.append(current_dir)
 from utils import (transform_to_iso_8601,
                    transform_to_datetime,
                    transform_perf_key,
-                   compress_json_array,
+                   json_array_to_csv,
                    get_rds_client,
                    get_vpc_client,
                    get_bill_client)
@@ -40,9 +41,12 @@ async def describe_db_instances(region_id: str):
     """
     client = get_rds_client(region_id)
     try:
-        request = rds_20140815_models.DescribeDBInstancesRequest(region_id=region_id)
+        request = rds_20140815_models.DescribeDBInstancesRequest(
+            region_id=region_id,
+            page_size=100
+        )
         response = client.describe_dbinstances(request)
-        return response.body.to_map()
+        return json_array_to_csv(response.body.items.dbinstance)
     except Exception as e:
         raise e
 
@@ -113,7 +117,7 @@ async def describe_db_instance_performance(region_id: str,
         response = client.describe_dbinstance_performance(request)
         responses = []
         for perf_key in response.body.performance_keys.performance_key:
-            perf_key_info = f"""Key={perf_key.key}; Unit={perf_key.unit}; ValueFormat={perf_key.value_format}; Values={compress_json_array([item.to_map() for item in _compress_performance(perf_key.values.performance_value)])}"""
+            perf_key_info = f"""Key={perf_key.key}; Unit={perf_key.unit}; ValueFormat={perf_key.value_format}; Values={json_array_to_csv(_compress_performance(perf_key.values.performance_value))}"""
             responses.append(perf_key_info)
         return responses
     except Exception as e:
@@ -905,12 +909,8 @@ async def describe_db_instance_parameters(
 
                 db_instance_parameters[db_instance_id] = {
                     "ParamGroupInfo": response.body.param_group_info.to_map(),
-                    "ConfigParameters": compress_json_array([
-                        config_parameter.to_map() for config_parameter in response.body.config_parameters.dbinstance_parameter
-                    ]),
-                    "RunningParameters": compress_json_array([
-                        running_parameter.to_map() for running_parameter in response.body.running_parameters.dbinstance_parameter
-                    ])
+                    "ConfigParameters": json_array_to_csv(response.body.config_parameters.dbinstance_parameter),
+                    "RunningParameters": json_array_to_csv(response.body.running_parameters.dbinstance_parameter)
                 }
         return db_instance_parameters
     except Exception as e:
@@ -978,7 +978,7 @@ async def describe_bills(
                             "BillingItemUsage": item.usage,
                         }
                     )
-            res[billing_cycle] = compress_json_array(item_filters)
+            res[billing_cycle] = json_array_to_csv(item_filters)
         return res
     except Exception as e:
         raise e

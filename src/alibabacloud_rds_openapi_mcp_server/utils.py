@@ -1,5 +1,7 @@
+import csv
 import os
 from datetime import datetime, timezone
+from io import StringIO
 
 from alibabacloud_bssopenapi20171214.client import Client as BssOpenApi20171214Client
 from alibabacloud_rds20140815.client import Client as RdsClient
@@ -66,13 +68,31 @@ def transform_perf_key(db_type: str, perf_keys: list[str]):
     return perf_key_after_transform
 
 
-def compress_json_array(json_array: list[dict]):
-    if not json_array or len(json_array) == 0:
+def json_array_to_csv(data):
+    if not data or not isinstance(data, list):
         return ""
-    compress_str = ";".join(json_array[0].keys())
-    for item in json_array:
-        compress_str += "|" + ";".join([str(item[key] if key in item else "") for key in json_array[0].keys()])
-    return compress_str
+
+    fieldnames = set()
+    for item in data:
+        if isinstance(item, dict):
+            fieldnames.update(item.keys())
+        elif hasattr(item, 'to_map'):
+            fieldnames.update(item.to_map().keys())
+
+    if not fieldnames:
+        return ""
+
+    output = StringIO()
+    writer = csv.DictWriter(output, fieldnames=sorted(fieldnames))
+
+    writer.writeheader()
+    for item in data:
+        if isinstance(item, dict):
+            writer.writerow({k: v if v is not None else '' for k, v in item.items()})
+        elif hasattr(item, 'to_map'):
+            writer.writerow({k: v if v is not None else '' for k, v in item.to_map().items()})
+
+    return output.getvalue()
 
 
 def get_rds_client(region_id: str):
