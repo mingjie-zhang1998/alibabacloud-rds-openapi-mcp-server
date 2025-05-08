@@ -359,10 +359,11 @@ async def create_db_instance(
         vpc_id: str,
         vswitch_id: str,
         zone_id: str,
+        zone_id_slave1: str = None,
+        zone_id_slave2: str = None,
         security_ip_list: str = "127.0.0.1",
         instance_network_type: str = "VPC",
         pay_type: str = "Postpaid",
-        instance_charge_type: str = None,
         system_db_charset: str = None,
         dbinstance_net_type: str = "Internet",
         category: str = "Basic",
@@ -385,6 +386,8 @@ async def create_db_instance(
         security_ip_list: IP whitelist, separated by commas. Default: "127.0.0.1".
         instance_network_type: Network type (Classic, VPC). Default: VPC.
         zone_id: Zone ID. Query available zones by `describe_available_zones`.
+        zone_id_slave1: Slave Node1 Zone ID. Query available zones by `describe_available_zones`.
+        zone_id_slave2: Slave Node2 Zone ID. Query available zones by `describe_available_zones`.
         pay_type: Payment type (Postpaid, Prepaid). Default: Postpaid.
         instance_charge_type: Instance charge type.
         system_db_charset: Character set.
@@ -419,12 +422,14 @@ async def create_db_instance(
         # Add optional parameters
         if zone_id:
             request.zone_id = zone_id
+        if zone_id_slave1:
+            request.zone_id_slave_1 = zone_id_slave1
+        if zone_id_slave2:
+            request.zone_id_slave_2 = zone_id_slave2
         if pay_type:
             request.pay_type = pay_type
-        if instance_charge_type:
-            request.instance_charge_type = instance_charge_type
         if system_db_charset:
-            request.system_db_charset = system_db_charset
+            request.system_dbcharset = system_db_charset
         if dbinstance_net_type:
             request.dbinstance_net_type = dbinstance_net_type
         if category:
@@ -432,9 +437,9 @@ async def create_db_instance(
         if dbinstance_storage_type:
             request.dbinstance_storage_type = dbinstance_storage_type
         if vpc_id:
-            request.vpc_id = vpc_id
+            request.vpcid = vpc_id
         if vswitch_id:
-            request.vswitch_id = vswitch_id
+            request.v_switch_id = vswitch_id
         if private_ip_address:
             request.private_ip_address = private_ip_address
         if client_token:
