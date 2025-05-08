@@ -20,10 +20,10 @@ authors = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server"
-Documentation = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server/"
-Source = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server.git"
-"Bug Tracker" = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server/issues"
+Homepage = "https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server"
+Documentation = "https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server/"
+Source = "https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git"
+"Bug Tracker" = "https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/alibabacloud_rds_openapi_mcp_server"]
