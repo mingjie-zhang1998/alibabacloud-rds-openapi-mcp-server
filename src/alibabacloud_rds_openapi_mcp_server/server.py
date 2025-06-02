@@ -1103,14 +1103,17 @@ async def describe_all_whitelist_template(
         client = get_rds_client(region_id)
         next_pages = True
         all_whitelists = []
+        page_num = 1
         while next_pages:
             request = rds_20140815_models.DescribeAllWhitelistTemplateRequest(
                 template_name=template_name,
-                fuzzy_search=True,
-                max_records_per_page=100
+                fuzzy_search=False if template_name is None else True,
+                max_records_per_page=100,
+                page_numbers=page_num
             )
             response = await client.describe_all_whitelist_template_async(request)
             next_pages = response.body.data.has_next
+            page_num += 1
             all_whitelists.extend(response.body.data.templates)
         return [item.to_map() for item in all_whitelists]
     except Exception as e:
