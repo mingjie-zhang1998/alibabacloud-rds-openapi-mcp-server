@@ -86,6 +86,7 @@ async def describe_db_instance_performance(region_id: str,
         start_time: start time(e.g. 2023-01-01 00:00)
         end_time: end time(e.g. 2023-01-01 00:00)
     """
+
     def _compress_performance(performance_value, max_items=10):
         if len(performance_value) > max_items:
             result = []
@@ -93,7 +94,8 @@ async def describe_db_instance_performance(region_id: str,
             for i in range(0, len(performance_value), int(offset)):
                 _item = None
                 for j in range(i, min(i + int(offset), len(performance_value))):
-                    if _item is None or sum([float(v) for v in performance_value[j].value.split('&')]) > sum([float(v) for v in _item.value.split('&')]):
+                    if _item is None or sum([float(v) for v in performance_value[j].value.split('&')]) > sum(
+                            [float(v) for v in _item.value.split('&')]):
                         _item = performance_value[j]
                 else:
                     result.append(_item)
@@ -879,6 +881,43 @@ async def describe_db_instance_accounts(
     except Exception as e:
         raise e
 
+
+@mcp.tool()
+async def create_db_instance_account(
+        region_id: str,
+        db_instance_id: str,
+        account_name: str,
+        account_password: str,
+        account_description: str = None,
+        account_type: str = "Normal"
+) -> dict:
+    """
+    Create a new account for an RDS instance.
+    Args:
+        region_id: The region ID of the RDS instance.
+        db_instance_id: The ID of the RDS instance.
+        account_name: The name of the new account.
+        account_password: The password for the new account.
+        account_description: The description for the new account.
+        account_type: The type of the new account. (e.g. Normal,Super)
+    Returns:
+         dict[str, Any]: The response.
+    """
+    try:
+        client = get_rds_client(region_id)
+        request = rds_20140815_models.CreateAccountRequest(
+            dbinstance_id=db_instance_id,
+            account_name=account_name,
+            account_password=account_password,
+            account_description=account_description,
+            account_type=account_type
+        )
+        response = await client.create_account_async(request)
+        return response.body.to_map()
+    except Exception as e:
+        raise e
+
+
 @mcp.tool()
 async def describe_db_instance_parameters(
         region_id: str,
@@ -990,6 +1029,174 @@ async def describe_bills(
 
 
 @mcp.tool()
+async def modify_db_instance_description(
+        region_id: str,
+        db_instance_id: str,
+        description: str
+):
+    """
+    modify db instance description.
+    Args:
+        region_id: The region ID of the RDS instance.
+        db_instance_id: The ID of the RDS instance.
+        description: The RDS instance description.
+    Returns:
+        dict[str, Any]: The response.
+    """
+    try:
+        client = get_rds_client(region_id)
+        request = rds_20140815_models.ModifyDBInstanceDescriptionRequest(
+            dbinstance_id=db_instance_id,
+            dbinstance_description=description
+        )
+        response = await client.modify_dbinstance_description_async(request)
+        return response.body.to_map()
+    except Exception as e:
+        raise e
+
+
+@mcp.tool()
+async def allocate_instance_public_connection(
+        region_id: str,
+        db_instance_id: str,
+        connection_string_prefix: str = None,
+        port: str = '3306'
+):
+    """
+    allocate db instance public connection.
+    Args:
+        region_id: The region ID of the RDS instance.
+        db_instance_id: The ID of the RDS instance.
+        connection_string_prefix: The prefix of connection string.
+    Returns:
+        dict[str, Any]: The response.
+    """
+    try:
+        if connection_string_prefix is None:
+            connection_string_prefix = db_instance_id + "-public"
+        client = get_rds_client(region_id)
+        request = rds_20140815_models.AllocateInstancePublicConnectionRequest(
+            dbinstance_id=db_instance_id,
+            connection_string_prefix=connection_string_prefix,
+            port=port
+        )
+        response = await client.allocate_instance_public_connection_async(request)
+        return response.body.to_map()
+    except Exception as e:
+        raise e
+
+
+@mcp.tool()
+async def describe_all_whitelist_template(
+        region_id: str,
+        template_name: str = None
+) -> List[Dict[str, Any]]:
+    """
+    describe all whitelist template.
+    Args:
+        region_id: The region ID of the RDS instance.
+        template_name: The ID of the RDS instance.
+    Returns:
+        List[Dict[str, Any]]: The response contains all whitelist template information.
+    """
+    try:
+        client = get_rds_client(region_id)
+        next_pages = True
+        all_whitelists = []
+        while next_pages:
+            request = rds_20140815_models.DescribeAllWhitelistTemplateRequest(
+                template_name=template_name,
+                fuzzy_search=True,
+                max_records_per_page=100
+            )
+            response = await client.describe_all_whitelist_template_async(request)
+            next_pages = response.body.data.has_next
+            all_whitelists.extend(response.body.data.templates)
+        return [item.to_map() for item in all_whitelists]
+    except Exception as e:
+        raise e
+
+
+@mcp.tool()
+async def describe_instance_linked_whitelist_template(
+        region_id: str,
+        db_instance_id: str
+):
+    """
+    describe instance linked whitelist template.
+    Args:
+        region_id: The region ID of the RDS instance.
+        db_instance_id: The ID of the RDS instance.
+    Returns:
+        dict[str, Any]: The response.
+    """
+    try:
+        client = get_rds_client(region_id)
+        request = rds_20140815_models.DescribeInstanceLinkedWhitelistTemplateRequest(
+            ins_name=db_instance_id
+        )
+        response = await client.describe_instance_linked_whitelist_template_async(request)
+        return response.body.to_map()
+    except Exception as e:
+        raise e
+
+
+@mcp.tool()
+async def attach_whitelist_template_to_instance(
+        region_id: str,
+        db_instance_id: str,
+        template_id: int
+):
+    """
+    allocate db instance public connection.
+    Args:
+        region_id: The region ID of the RDS instance.
+        db_instance_id: The ID of the RDS instance.
+        template_id: Whitelist Template ID. Can be obtained via DescribeAllWhitelistTemplate.
+    Returns:
+        dict[str, Any]: The response.
+    """
+    try:
+        client = get_rds_client(region_id)
+        request = rds_20140815_models.AttachWhitelistTemplateToInstanceRequest(
+            ins_name=db_instance_id,
+            template_id=template_id
+        )
+        response = await client.attach_whitelist_template_to_instance_async(request)
+        return response.body.to_map()
+    except Exception as e:
+        raise e
+
+
+@mcp.tool()
+async def add_tags_to_db_instance(
+        region_id: str,
+        db_instance_id: str,
+        tags: Dict[str, str]
+):
+    """
+    add tags to db instance.
+    Args:
+        region_id: The region ID of the RDS instance.
+        db_instance_id: The ID of the RDS instance.
+        tags: The tags to be added to the RDS instance.
+    Returns:
+        dict[str, Any]: The response.
+    """
+    try:
+        client = get_rds_client(region_id)
+        request = rds_20140815_models.AddTagsToResourceRequest(
+            region_id=region_id,
+            dbinstance_id=db_instance_id,
+            tags=json.dumps(tags)
+        )
+        response = await client.add_tags_to_resource_async(request)
+        return response.body.to_map()
+    except Exception as e:
+        raise e
+
+
+@mcp.tool()
 async def get_current_time() -> Dict[str, Any]:
     """Get the current time.
 
@@ -1013,7 +1220,7 @@ async def get_current_time() -> Dict[str, Any]:
 
 
 def main():
-    mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'stdio'))
+    mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'sse'))
 
 
 if __name__ == '__main__':

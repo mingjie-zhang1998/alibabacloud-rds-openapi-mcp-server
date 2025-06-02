@@ -77,26 +77,32 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 
 ## 功能组件
 ### 工具集
+* `add_tags_to_db_instance`: 添加标签到RDS实例
+* `allocate_instance_public_connection`: 为RDS实例分配公网连接
+* `attach_whitelist_template_to_instance`: 将白名单模板绑定到RDS实例
 * `create_db_instance`: 创建RDS实例
-* `describe_db_instances`: 查询实例列表
-* `describe_db_instance_attribute`: 查询实例详情
-* `describe_db_instance_metrics`: 查询实例性能数据、错误日志和SQL报告
-* `describe_db_instance_performance`: 查询实例性能数据
-* `describe_error_logs`: 查询实例错误日志
-* `describe_db_instance_net_info`: 批量查询实例网络信息
-* `describe_db_instance_ip_allowlist`: 批量查询实例IP白名单配置
-* `describe_db_instance_databases`: 批量查询实例的DB信息
-* `describe_db_instance_accounts`: 批量查询实例的账号信息
+* `create_db_instance_account`: 创建RDS实例账号
+* `describe_all_whitelist_template`: 查询白名单模板列表
 * `describe_available_classes`: 查询可用实例规格和存储范围
-* `describe_available_zones`: 查询RDS可用区
-* `describe_bills`: 批量查询实例账单信息.
+* `describe_available_zones`: 查询RDS实例可用区域
+* `describe_bills`: 查询用户在特定计费周期内所有产品实例或计费项的消费汇总
+* `describe_db_instance_accounts`: 批量查询多个RDS实例的账户信息
+* `describe_db_instance_attribute`: 查询实例详细信息
+* `describe_db_instance_databases`: 批量查询多个RDS实例的数据库信息
+* `describe_db_instance_ip_allowlist`: 批量查询多个RDS实例的IP白名单配置
+* `describe_db_instance_net_info`: 批量查询多个RDS实例的网络配置详情
+* `describe_db_instance_parameters`: 批量查询多个RDS实例的参数信息
+* `describe_db_instance_performance`: 查询实例性能数据
+* `describe_db_instances`: 查询实例
+* `describe_error_logs`: 查询实例错误日志
+* `describe_instance_linked_whitelist_template`: 查询绑定到实例的白名单模板列表
+* `describe_slow_log_records`: 查询RDS实例的慢日志记录
 * `describe_vpcs`: 查询VPC列表
-* `describe_vswitches`: 查询虚拟交换机列表
-* `describe_slow_log_records`: 查询RDS慢日志记录
-* `describe_db_instance_parameters`: 批量查询实例参数信息.
-* `modify_parameter`: 修改RDS实例参数
-* `modify_db_instance_spec`: 调整RDS实例规格
+* `describe_vswitches`: 查询VSwitch列表
 * `get_current_time`: 获取当前时间
+* `modify_db_instance_description`: 修改RDS实例描述
+* `modify_db_instance_spec`: 修改RDS实例规格
+* `modify_parameter`: 修改RDS实例参数
 
 ### 资源
 当前暂无资源

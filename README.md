@@ -80,25 +80,32 @@ Add the following configuration to the MCP client configuration file:
 
 ## Components
 ### Tools
+* `add_tags_to_db_instance`: Add tags to an RDS instance.
+* `allocate_instance_public_connection`: Allocate a public connection for an RDS instance.
+* `attach_whitelist_template_to_instance`: Attach a whitelist template to an RDS instance.
 * `create_db_instance`: Create an RDS instance.
-* `describe_db_instances`: Queries instances.
-* `describe_db_instance_attribute`: Queries the details of an instance.
-* `describe_db_instance_performance`: Queries the performance data of an instance.
-* `describe_error_logs`: Queries the error log of an instance.
-* `describe_db_instance_net_info`: Batch retrieves network configuration details for multiple RDS instances.
-* `describe_db_instance_ip_allowlist`: Batch retrieves IP allowlist configurations for multiple RDS instances.
-* `describe_db_instance_databases`: Batch retrieves database information for multiple RDS instances.
-* `describe_db_instance_accounts`: Batch retrieves account information for multiple RDS instances.
+* `create_db_instance_account`: Create an account for RDS instance.
+* `describe_all_whitelist_template`: Query the whitelist template list.
 * `describe_available_classes`: Query available instance classes and storage ranges.
 * `describe_available_zones`: Query available zones for RDS instances.
 * `describe_bills`: Query the consumption summary of all product instances or billing items for a user within a specific billing period.
+* `describe_db_instance_accounts`: Batch retrieves account information for multiple RDS instances.
+* `describe_db_instance_attribute`: Queries the details of an instance.
+* `describe_db_instance_databases`: Batch retrieves database information for multiple RDS instances.
+* `describe_db_instance_ip_allowlist`: Batch retrieves IP allowlist configurations for multiple RDS instances.
+* `describe_db_instance_net_info`: Batch retrieves network configuration details for multiple RDS instances.
+* `describe_db_instance_parameters`: Batch retrieves parameter information for multiple RDS instances.
+* `describe_db_instance_performance`: Queries the performance data of an instance.
+* `describe_db_instances`: Queries instances.
+* `describe_error_logs`: Queries the error log of an instance.
+* `describe_instance_linked_whitelist_template`: Query the whitelist template list.
+* `describe_slow_log_records`: Query slow log records for an RDS instance.
 * `describe_vpcs`: Query VPC list.
 * `describe_vswitches`: Query VSwitch list.
-* `describe_slow_log_records`: Query slow log records for an RDS instance.
-* `describe_db_instance_parameters`: Batch retrieves parameter information for multiple RDS instances.
-* `modify_parameter`: Modify RDS instance parameters.
-* `modify_db_instance_spec`: Modify RDS instance specifications.
 * `get_current_time`: Get the current time.
+* `modify_db_instance_description`: Modify RDS instance descriptions.
+* `modify_db_instance_spec`: Modify RDS instance specifications.
+* `modify_parameter`: Modify RDS instance parameters.
 
 ### Resources
 None at this time
