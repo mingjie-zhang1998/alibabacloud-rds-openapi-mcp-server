@@ -1225,7 +1225,7 @@ async def get_current_time() -> Dict[str, Any]:
 
 
 def main():
-    mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'sse'))
+    mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'stdio'))
 
 
 if __name__ == '__main__':
