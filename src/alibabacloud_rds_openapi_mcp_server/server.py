@@ -1136,6 +1136,7 @@ async def describe_instance_linked_whitelist_template(
     try:
         client = get_rds_client(region_id)
         request = rds_20140815_models.DescribeInstanceLinkedWhitelistTemplateRequest(
+            region_id=region_id,
             ins_name=db_instance_id
         )
         response = await client.describe_instance_linked_whitelist_template_async(request)
@@ -1162,6 +1163,7 @@ async def attach_whitelist_template_to_instance(
     try:
         client = get_rds_client(region_id)
         request = rds_20140815_models.AttachWhitelistTemplateToInstanceRequest(
+            region_id=region_id,
             ins_name=db_instance_id,
             template_id=template_id
         )
