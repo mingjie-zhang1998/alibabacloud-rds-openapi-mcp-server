@@ -376,7 +376,9 @@ async def create_db_instance(
         tde_status: str = None,
         encryption_key: str = None,
         serverless_config: Dict[str, Any] = None,
-        table_names_case_sensitive: bool = False
+        table_names_case_sensitive: bool = False,
+        db_time_zone: str = None,
+        connection_string: str = None
 ) -> Dict[str, Any]:
     """Create an RDS instance.
 
@@ -406,6 +408,8 @@ async def create_db_instance(
         encryption_key: Custom encryption key.
         serverless_config: Serverless instance configuration.
         table_names_case_sensitive: Are table names case-sensitive.
+        db_time_zone: the db instance time zone.
+        connection_string: the connection string for db instance.
     Returns:
         Dict[str, Any]: Response containing the created instance details.
     """
@@ -420,7 +424,9 @@ async def create_db_instance(
             dbinstance_storage=dbinstance_storage,
             security_iplist=security_ip_list,
             instance_network_type=instance_network_type,
-            dbis_ignore_case=str(not table_names_case_sensitive).lower()
+            dbis_ignore_case=str(not table_names_case_sensitive).lower(),
+            dbtime_zone=db_time_zone,
+            connection_string=connection_string
         )
 
         # Add optional parameters
