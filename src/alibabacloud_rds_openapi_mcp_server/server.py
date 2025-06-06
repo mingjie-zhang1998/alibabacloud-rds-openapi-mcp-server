@@ -915,6 +915,70 @@ async def get_current_time() -> Dict[str, Any]:
         raise Exception(f"Failed to get the current time: {str(e)}")
 
 
+@mcp.tool()
+async def modify_security_ips(
+        region_id: str,
+        dbinstance_id: str,
+        security_ips: str,
+        whitelist_network_type: str = "MIX",
+        security_ip_type: str = None,
+        dbinstance_ip_array_name: str = None,
+        dbinstance_ip_array_attribute: str = None,
+        client_token: str = None
+) -> Dict[str, Any]:
+    """修改RDS实例的白名单。
+
+    Args:
+        region_id (str): RDS实例的地域ID。
+        dbinstance_id (str): RDS实例ID。
+        security_ips (str): 白名单IP列表，多个IP用逗号分隔。例如："192.168.1.1,192.168.1.2"。
+        whitelist_network_type (str, optional): 白名单网络类型。可选值：
+            - MIX：混合网络类型
+            - Classic：经典网络
+            - VPC：专有网络
+            默认值：MIX
+        security_ip_type (str, optional): 白名单IP类型。可选值：
+            - normal：普通白名单
+            - hidden：隐藏白名单
+        dbinstance_ip_array_name (str, optional): 白名单分组名称。
+        dbinstance_ip_array_attribute (str, optional): 白名单分组属性。可选值：
+            - hidden：隐藏白名单
+            - normal：普通白名单
+        client_token (str, optional): 幂等性Token，最大64个ASCII字符。
+
+    Returns:
+        Dict[str, Any]: 包含请求ID的响应。
+    """
+    try:
+        # 初始化客户端
+        client = get_rds_client(region_id)
+
+        # 创建请求
+        request = rds_20140815_models.ModifySecurityIpsRequest(
+            dbinstance_id=dbinstance_id,
+            security_ips=security_ips,
+            whitelist_network_type=whitelist_network_type
+        )
+
+        # 添加可选参数
+        if security_ip_type:
+            request.security_ip_type = security_ip_type
+        if dbinstance_ip_array_name:
+            request.dbinstance_ip_array_name = dbinstance_ip_array_name
+        if dbinstance_ip_array_attribute:
+            request.dbinstance_ip_array_attribute = dbinstance_ip_array_attribute
+        if client_token:
+            request.client_token = client_token
+
+        # 发送API请求
+        response = client.modify_security_ips(request)
+        return response.body.to_map()
+
+    except Exception as e:
+        logger.error(f"修改白名单时发生错误: {str(e)}")
+        raise OpenAPIError(f"修改RDS实例白名单失败: {str(e)}")
+
+
 def main():
     mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'stdio'))
 
