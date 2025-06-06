@@ -1235,6 +1235,70 @@ async def get_current_time() -> Dict[str, Any]:
         raise Exception(f"Failed to get the current time: {str(e)}")
 
 
+@mcp.tool()
+async def modify_security_ips(
+        region_id: str,
+        dbinstance_id: str,
+        security_ips: str,
+        whitelist_network_type: str = "MIX",
+        security_ip_type: str = None,
+        dbinstance_ip_array_name: str = None,
+        dbinstance_ip_array_attribute: str = None,
+        client_token: str = None
+) -> Dict[str, Any]:
+    """modify security ips。
+
+    Args:
+        region_id (str): RDS instance region id.
+        dbinstance_id (str): RDS instance id.
+        security_ips (str): security ips list, separated by commas.
+        whitelist_network_type (str, optional): whitelist network type.
+            - MIX: mixed network type
+            - Classic: classic network
+            - VPC: vpc
+            default value: MIX
+        security_ip_type (str, optional): security ip type.
+            - normal: normal security ip
+            - hidden: hidden security ip
+        dbinstance_ip_array_name (str, optional): security ip array name.
+        dbinstance_ip_array_attribute (str, optional): security ip array attribute.
+            - hidden: hidden security ip
+            - normal: normal security ip
+        client_token (str, optional): idempotency token, max 64 ascii characters.
+
+    Returns:
+        Dict[str, Any]: response contains request id.
+    """
+    try:
+        # initialize client
+        client = get_rds_client(region_id)
+
+        # create request
+        request = rds_20140815_models.ModifySecurityIpsRequest(
+            dbinstance_id=dbinstance_id,
+            security_ips=security_ips,
+            whitelist_network_type=whitelist_network_type
+        )
+
+        # add optional parameters
+        if security_ip_type:
+            request.security_ip_type = security_ip_type
+        if dbinstance_ip_array_name:
+            request.dbinstance_ip_array_name = dbinstance_ip_array_name
+        if dbinstance_ip_array_attribute:
+            request.dbinstance_ip_array_attribute = dbinstance_ip_array_attribute
+        if client_token:
+            request.client_token = client_token
+
+        # send api request
+        response = client.modify_security_ips(request)
+        return response.body.to_map()
+
+    except Exception as e:
+        logger.error(f"modify security ips error: {str(e)}")
+        raise OpenAPIError(f"modify rds instance security ips failed: {str(e)}")
+
+
 def main():
     mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'stdio'))
 
