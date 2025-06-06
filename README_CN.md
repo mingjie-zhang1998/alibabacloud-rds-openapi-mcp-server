@@ -104,6 +104,7 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 * `modify_db_instance_description`: 修改RDS实例描述
 * `modify_db_instance_spec`: 修改RDS实例规格
 * `modify_parameter`: 修改RDS实例参数
+* `restart_db_instance`: 重启RDS实例
 
 ### 资源
 当前暂无资源
