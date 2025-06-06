@@ -147,3 +147,10 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 ## 许可证
 本项目采用Apache 2.0许可证
 
+## 联系信息
+如有任何疑问或疑虑，请通过钉钉群联系我们。
+<h1 align="center">
+  <a>
+    <img src="https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server/blob/main/assets/dingding.png?raw=true" width="541" height="360.5" alt="dingding" /><br>
+  </a>
+</h1>
