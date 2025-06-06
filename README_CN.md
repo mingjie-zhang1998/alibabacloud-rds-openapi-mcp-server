@@ -91,6 +91,7 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 * `describe_slow_log_records`: 查询RDS慢日志记录
 * `modify_parameter`: 修改RDS实例参数
 * `modify_db_instance_spec`: 调整RDS实例规格
+* `modify_security_ips`: 修改白名单
 * `get_current_time`: 获取当前时间
 
 ### 资源

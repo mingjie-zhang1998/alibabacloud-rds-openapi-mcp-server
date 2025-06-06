@@ -93,6 +93,7 @@ Add the following configuration to the MCP client configuration file:
 * `describe_slow_log_records`: Query slow log records for an RDS instance.
 * `modify_parameter`: Modify RDS instance parameters.
 * `modify_db_instance_spec`: Modify RDS instance specifications.
+* `modify_security_ips`: Modify security ips
 * `get_current_time`: Get the current time.
 
 ### Resources

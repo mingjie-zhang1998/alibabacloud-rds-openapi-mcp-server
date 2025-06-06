@@ -926,41 +926,41 @@ async def modify_security_ips(
         dbinstance_ip_array_attribute: str = None,
         client_token: str = None
 ) -> Dict[str, Any]:
-    """修改RDS实例的白名单。
+    """modify security ips。
 
     Args:
-        region_id (str): RDS实例的地域ID。
-        dbinstance_id (str): RDS实例ID。
-        security_ips (str): 白名单IP列表，多个IP用逗号分隔。例如："192.168.1.1,192.168.1.2"。
-        whitelist_network_type (str, optional): 白名单网络类型。可选值：
-            - MIX：混合网络类型
-            - Classic：经典网络
-            - VPC：专有网络
-            默认值：MIX
-        security_ip_type (str, optional): 白名单IP类型。可选值：
-            - normal：普通白名单
-            - hidden：隐藏白名单
-        dbinstance_ip_array_name (str, optional): 白名单分组名称。
-        dbinstance_ip_array_attribute (str, optional): 白名单分组属性。可选值：
-            - hidden：隐藏白名单
-            - normal：普通白名单
-        client_token (str, optional): 幂等性Token，最大64个ASCII字符。
+        region_id (str): RDS instance region id.
+        dbinstance_id (str): RDS instance id.
+        security_ips (str): security ips list, separated by commas.
+        whitelist_network_type (str, optional): whitelist network type.
+            - MIX: mixed network type
+            - Classic: classic network
+            - VPC: vpc
+            default value: MIX
+        security_ip_type (str, optional): security ip type.
+            - normal: normal security ip
+            - hidden: hidden security ip
+        dbinstance_ip_array_name (str, optional): security ip array name.
+        dbinstance_ip_array_attribute (str, optional): security ip array attribute.
+            - hidden: hidden security ip
+            - normal: normal security ip
+        client_token (str, optional): idempotency token, max 64 ascii characters.
 
     Returns:
-        Dict[str, Any]: 包含请求ID的响应。
+        Dict[str, Any]: response contains request id.
     """
     try:
-        # 初始化客户端
+        # initialize client
         client = get_rds_client(region_id)
 
-        # 创建请求
+        # create request
         request = rds_20140815_models.ModifySecurityIpsRequest(
             dbinstance_id=dbinstance_id,
             security_ips=security_ips,
             whitelist_network_type=whitelist_network_type
         )
 
-        # 添加可选参数
+        # add optional parameters
         if security_ip_type:
             request.security_ip_type = security_ip_type
         if dbinstance_ip_array_name:
@@ -970,13 +970,13 @@ async def modify_security_ips(
         if client_token:
             request.client_token = client_token
 
-        # 发送API请求
+        # send api request
         response = client.modify_security_ips(request)
         return response.body.to_map()
 
     except Exception as e:
-        logger.error(f"修改白名单时发生错误: {str(e)}")
-        raise OpenAPIError(f"修改RDS实例白名单失败: {str(e)}")
+        logger.error(f"modify security ips error: {str(e)}")
+        raise OpenAPIError(f"modify rds instance security ips failed: {str(e)}")
 
 
 def main():
