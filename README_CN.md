@@ -149,3 +149,5 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 
 ## 联系信息
 如有任何疑问或疑虑，请通过钉钉群联系我们：106730017609
+
+<img src="./assets/dingding.png" alt="store" width="500"/>

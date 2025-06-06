@@ -152,3 +152,5 @@ This project is licensed under the Apache 2.0 License.
 
 ## Contact Information
 For any questions or concerns, please contact us through the DingTalk group：106730017609
+
+<img src="./assets/dingding.png" alt="store" width="500"/>
