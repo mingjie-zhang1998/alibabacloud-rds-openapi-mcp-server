@@ -151,9 +151,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 This project is licensed under the Apache 2.0 License.
 
 ## Contact Information
-For any questions or concerns, please contact us through the DingTalk group.
-<h1 align="center">
-  <a>
-    <img src="https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server/blob/main/assets/dingding.png?raw=true" width="541" height="360.5" alt="dingding" /><br>
-  </a>
-</h1>
+For any questions or concerns, please contact us through the DingTalk group：106730017609
