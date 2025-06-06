@@ -73,6 +73,21 @@ wheels = [
 ]
 
 [[package]]
+name = "alibabacloud-bssopenapi20171214"
+version = "5.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "alibabacloud-endpoint-util" },
+    { name = "alibabacloud-openapi-util" },
+    { name = "alibabacloud-tea-openapi" },
+    { name = "alibabacloud-tea-util" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/23/91/8a5dd7be8fc9c280aaa2fa6a6e03e5b282179664ab9f4badb96e0ce8abc0/alibabacloud_bssopenapi20171214-5.0.0.tar.gz", hash = "sha256:76dcf00a5a834d66f5eca061e56b7d5bba3fd9dea796efbbe4c4900d18bd4f3a", size = 139590 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6b/9c/74eeb1f7eb6f96a4d6ee8b47ad1469d05df9215f242935aad9dae370b48c/alibabacloud_bssopenapi20171214-5.0.0-py3-none-any.whl", hash = "sha256:1b45fa23ff8dd4ab650b9ae42cda3c12423f1c33d22fea011212bdac75998f20", size = 140975 },
+]
+
+[[package]]
 name = "alibabacloud-credentials"
 version = "0.3.6"
 source = { registry = "https://pypi.org/simple" }
@@ -111,9 +126,10 @@ sdist = { url = "https://files.pythonhosted.org/packages/f6/50/5f41ab550d7874c62
 
 [[package]]
 name = "alibabacloud-rds-openapi-mcp-server"
-version = "1.2.1"
+version = "1.6.2"
 source = { virtual = "." }
 dependencies = [
+    { name = "alibabacloud-bssopenapi20171214" },
     { name = "alibabacloud-rds20140815" },
     { name = "alibabacloud-vpc20160428" },
     { name = "httpx" },
@@ -122,6 +138,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "alibabacloud-bssopenapi20171214", specifier = ">=5.0.0" },
     { name = "alibabacloud-rds20140815", specifier = ">=11.0.0" },
     { name = "alibabacloud-vpc20160428", specifier = ">=6.11.4" },
     { name = "httpx", specifier = ">=0.28.1" },

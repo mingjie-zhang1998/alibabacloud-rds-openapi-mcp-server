@@ -1,10 +1,11 @@
 [project]
 name = "alibabacloud-rds-openapi-mcp-server"
-version = "1.2.2"
+version = "1.7.5"
 description = "MCP server for RDS Services via OPENAPI."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "alibabacloud-bssopenapi20171214>=5.0.0",
     "alibabacloud-rds20140815>=11.0.0",
     "alibabacloud-vpc20160428>=6.11.4",
     "httpx>=0.28.1",
@@ -19,10 +20,10 @@ authors = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server"
-Documentation = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server/"
-Source = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server.git"
-"Bug Tracker" = "https://github.com/aliyun/alibaba-cloud-ops-mcp-server/issues"
+Homepage = "https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server"
+Documentation = "https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server/"
+Source = "https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git"
+"Bug Tracker" = "https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/alibabacloud_rds_openapi_mcp_server"]

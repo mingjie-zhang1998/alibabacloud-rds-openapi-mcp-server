@@ -12,7 +12,7 @@ MCP server for RDS Services via OPENAPI
 ### Using [cherry-studio](https://github.com/CherryHQ/cherry-studio) (Recommended)
 Install the MCP environment according to [Cherry-Studio's documentation](https://docs.cherry-ai.com/advanced-basic/mcp/install), then configure and use RDS MCP.
 Add the following configuration to the MCP client configuration file:
-```json
+```json5
 "mcpServers": {
   "rds-openapi-mcp-server": {
     "command": "uvx",
@@ -21,7 +21,8 @@ Add the following configuration to the MCP client configuration file:
     ],
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
-      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key"
+      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
+      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token" // optional, required when using STS Token 
     }
   }
 }
@@ -34,6 +35,7 @@ Set you env and run mcp server.
 export SERVER_TRANSPORT=sse;
 export ALIBABA_CLOUD_ACCESS_KEY_ID=$you_access_id;
 export ALIBABA_CLOUD_ACCESS_KEY_SECRET=$you_access_key;
+export ALIBABA_CLOUD_SECURITY_TOKEN=$you_sts_security_token; # optional, required when using STS Token 
 
 # run mcp server
 uvx alibabacloud-rds-openapi-mcp-server@latest
@@ -57,7 +59,7 @@ Download from Github
 git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 ```
 Add the following configuration to the MCP client configuration file:
-```json
+```json5
 "mcpServers": {
   "rds-openapi-mcp-server": {
     "command": "uv",
@@ -69,7 +71,8 @@ Add the following configuration to the MCP client configuration file:
     ],
     "env": {
       "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
-      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key"
+      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
+      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token"  // optional, required when using STS Token
     }
   }
 }
@@ -77,17 +80,26 @@ Add the following configuration to the MCP client configuration file:
 
 ## Components
 ### Tools
+* `add_tags_to_db_instance`: Add tags to an RDS instance.
+* `allocate_instance_public_connection`: Allocate a public connection for an RDS instance.
+* `attach_whitelist_template_to_instance`: Attach a whitelist template to an RDS instance.
 * `create_db_instance`: Create an RDS instance.
-* `describe_db_instances`: Queries instances.
-* `describe_db_instance_attribute`: Queries the details of an instance.
-* `describe_db_instance_performance`: Queries the performance data of an instance.
-* `describe_error_logs`: Queries the error log of an instance.
-* `describe_db_instance_net_info`: Batch retrieves network configuration details for multiple RDS instances.
-* `describe_db_instance_ip_allowlist`: Batch retrieves IP allowlist configurations for multiple RDS instances.
-* `describe_db_instance_databases`: Batch retrieves database information for multiple RDS instances.
-* `describe_db_instance_accounts`: Batch retrieves account information for multiple RDS instances.
+* `create_db_instance_account`: Create an account for RDS instance.
+* `describe_all_whitelist_template`: Query the whitelist template list.
 * `describe_available_classes`: Query available instance classes and storage ranges.
 * `describe_available_zones`: Query available zones for RDS instances.
+* `describe_bills`: Query the consumption summary of all product instances or billing items for a user within a specific billing period.
+* `describe_db_instance_accounts`: Batch retrieves account information for multiple RDS instances.
+* `describe_db_instance_attribute`: Queries the details of an instance.
+* `describe_db_instance_databases`: Batch retrieves database information for multiple RDS instances.
+* `describe_db_instance_ip_allowlist`: Batch retrieves IP allowlist configurations for multiple RDS instances.
+* `describe_db_instance_net_info`: Batch retrieves network configuration details for multiple RDS instances.
+* `describe_db_instance_parameters`: Batch retrieves parameter information for multiple RDS instances.
+* `describe_db_instance_performance`: Queries the performance data of an instance.
+* `describe_db_instances`: Queries instances.
+* `describe_error_logs`: Queries the error log of an instance.
+* `describe_instance_linked_whitelist_template`: Query the whitelist template list.
+* `describe_slow_log_records`: Query slow log records for an RDS instance.
 * `describe_vpcs`: Query VPC list.
 * `describe_vswitches`: Query VSwitch list.
 * `describe_slow_log_records`: Query slow log records for an RDS instance.
@@ -95,6 +107,9 @@ Add the following configuration to the MCP client configuration file:
 * `modify_db_instance_spec`: Modify RDS instance specifications.
 * `modify_security_ips`: Modify security ips
 * `get_current_time`: Get the current time.
+* `modify_db_instance_description`: Modify RDS instance descriptions.
+* `modify_db_instance_spec`: Modify RDS instance specifications.
+* `modify_parameter`: Modify RDS instance parameters.
 
 ### Resources
 None at this time
@@ -108,7 +123,8 @@ You are a professional Alibaba Cloud RDS Copilot, specializing in providing cust
 
 ### Skill 1: Problem Decomposition and Analysis  
 - Deeply deconstruct user questions to identify core requirements and potential steps/commands involved.  
-- Provide clear task breakdowns to ensure each step contributes to the final solution.  
+- Provide clear task breakdowns to ensure each step contributes to the final solution.
+- Please organize your answers in a table format as much as possible.
 
 ### Skill 2: RDS MCP Tool Invocation  
 - Proficiently invoke the RDS MCP tool to retrieve database information or execute operations.  
@@ -137,3 +153,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 This project is licensed under the Apache 2.0 License.
+
+## Contact Information
+For any questions or concerns, please contact us through the DingTalk group：106730017609
+
+<img src="./assets/dingding.png" alt="store" width="500"/>
