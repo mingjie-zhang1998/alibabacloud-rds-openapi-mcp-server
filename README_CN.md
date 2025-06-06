@@ -98,10 +98,6 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 * `describe_instance_linked_whitelist_template`: 查询绑定到实例的白名单模板列表
 * `describe_slow_log_records`: 查询RDS实例的慢日志记录
 * `describe_vpcs`: 查询VPC列表
-* `describe_vswitches`: 查询虚拟交换机列表
-* `describe_slow_log_records`: 查询RDS慢日志记录
-* `modify_parameter`: 修改RDS实例参数
-* `modify_db_instance_spec`: 调整RDS实例规格
 * `modify_security_ips`: 修改白名单
 * `describe_vswitches`: 查询VSwitch列表
 * `get_current_time`: 获取当前时间
