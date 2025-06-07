@@ -1299,6 +1299,57 @@ async def modify_security_ips(
         raise OpenAPIError(f"modify rds instance security ips failed: {str(e)}")
 
 
+@mcp.tool()
+async def restart_db_instance(
+        region_id: str,
+        dbinstance_id: str,
+        effective_time: str = "Immediate",
+        switch_time: str = None,
+        client_token: str = None
+) -> Dict[str, Any]:
+    """Restart an RDS instance.
+
+    Args:
+        region_id (str): The region ID of the RDS instance.
+        dbinstance_id (str): The ID of the RDS instance.
+        effective_time (str, optional): When to restart the instance. Options:
+            - Immediate: Restart immediately
+            - MaintainTime: Restart during maintenance window
+            - ScheduleTime: Restart at specified time
+            Default: Immediate
+        switch_time (str, optional): The scheduled restart time in format: yyyy-MM-ddTHH:mm:ssZ (UTC time).
+            Required when effective_time is ScheduleTime.
+        client_token (str, optional): Idempotency token, max 64 ASCII characters.
+
+    Returns:
+        Dict[str, Any]: Response containing the request ID.
+    """
+    try:
+        # Initialize client
+        client = get_rds_client(region_id)
+
+        # Create request
+        request = rds_20140815_models.RestartDBInstanceRequest(
+            dbinstance_id=dbinstance_id
+        )
+
+        # Add optional parameters
+        if effective_time:
+            request.effective_time = effective_time
+        if switch_time:
+            request.switch_time = switch_time
+        if client_token:
+            request.client_token = client_token
+
+        # Make the API request
+        response = client.restart_dbinstance(request)
+        return response.body.to_map()
+
+    except Exception as e:
+        logger.error(f"Error occurred while restarting instance: {str(e)}")
+        raise OpenAPIError(f"Failed to restart RDS instance: {str(e)}")
+
+
 def main():
     mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'stdio'))
 
