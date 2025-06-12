@@ -216,7 +216,7 @@ cn-hangzhou实例rm-bp1696hd82oc438f目前无法连接，请立即尝试重启�
 
 ### Cherry Studio集成（推荐）🍒
 
-Cherry Studio是一个功能强大的MCP客户端，提供直观的图形界面来管理和使用MCP服务器。
+Cherry Studio是一款集成了多种大语言模型的跨平台AI客户端，支持AI对话、绘图等，旨在提升创作效率。
 
 在MCP客户端配置文件中添加以下配置：
 
@@ -304,7 +304,6 @@ Cherry Studio是一个功能强大的MCP客户端，提供直观的图形界面�
 
 - 💬 **钉钉群**: 106730017609
 - 🐛 **GitHub Issues**: [创建问题](https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server/issues)
-- 📧 **邮件支持**: [联系我们](mailto:support@example.com)
 
 ### 常见问题 ❓
 
