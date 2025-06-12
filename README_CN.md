@@ -70,6 +70,8 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 remote_server = "http://127.0.0.1:8000/sse";
 ```
 
+> 如果使用Qwen遇到`401 Incorrect API key provided`错误，请参考[文档](https://help.aliyun.com/zh/model-studio/cline)解决。
+
 ### 使用Claude
 从Github克隆仓库
 ```shell

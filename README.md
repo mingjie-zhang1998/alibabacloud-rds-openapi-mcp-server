@@ -70,6 +70,7 @@ And then configure the Cline.
 remote_server = "http://127.0.0.1:8000/sse";
 ```
 
+> If you encounter a `401 Incorrect API key provided` error when using Qwen, please refer to the [documentation](https://help.aliyun.com/zh/model-studio/cline) for solutions.
 
 ### Using Claude
 Download from Github
