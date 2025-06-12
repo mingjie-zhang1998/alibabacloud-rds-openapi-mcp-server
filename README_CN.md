@@ -11,7 +11,7 @@ RDS OpenAPI MCP服务。
 ### 使用[cherry-studio](https://github.com/CherryHQ/cherry-studio)（推荐）
 1. [下载](https://docs.cherry-ai.com/cherry-studio/download)并安装cherry-studio
 2. 根据[文档](https://docs.cherry-ai.com/advanced-basic/mcp/install)安装MCP环境所需的uv
-3. 根据[文档](https://docs.cherry-ai.com/advanced-basic/mcp/config) 配置和使用RDS MCP，,使用下面的JSON可以快速导入RDS MCP配置。请将`ALIBABA_CLOUD_ACCESS_KEY_ID`和`ALIBABA_CLOUD_ACCESS_KEY_SECRET`配置成阿里云AKSK。
+3. 根据[文档](https://docs.cherry-ai.com/advanced-basic/mcp/config) 配置和使用RDS MCP，使用下面的JSON可以快速导入RDS MCP配置。请将`ALIBABA_CLOUD_ACCESS_KEY_ID`和`ALIBABA_CLOUD_ACCESS_KEY_SECRET`配置成阿里云AKSK。
 
 > 导入时可能会看到以下报错，可以忽略：
 > xxx settings.mcp.addServer.importFrom.connectionFailed
