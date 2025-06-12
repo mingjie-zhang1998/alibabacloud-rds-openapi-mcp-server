@@ -9,22 +9,42 @@ RDS OpenAPI MCP服务。
 
 ## 快速开始
 ### 使用[cherry-studio](https://github.com/CherryHQ/cherry-studio)（推荐）
-根据[Cherry-Studio文档](https://docs.cherry-ai.com/advanced-basic/mcp/install)安装MCP环境后配置使用RDS MCP。 MCP配置文件格式如下：
+1. [下载](https://docs.cherry-ai.com/cherry-studio/download)并安装cherry-studio
+2. 根据[文档](https://docs.cherry-ai.com/advanced-basic/mcp/install)安装MCP环境所需的uv
+3. 根据[文档](https://docs.cherry-ai.com/advanced-basic/mcp/config) 配置和使用RDS MCP，,使用下面的JSON可以快速导入RDS MCP配置。请将`ALIBABA_CLOUD_ACCESS_KEY_ID`和`ALIBABA_CLOUD_ACCESS_KEY_SECRET`配置成阿里云AKSK。
+
+> 导入时可能会看到以下报错，可以忽略：
+> xxx settings.mcp.addServer.importFrom.connectionFailed
+
+<img src="./assets/cherry-config.png" alt="cherry_config"/>
+
 ```json5
-"mcpServers": {
-  "rds-openapi-mcp-server": {
-    "command": "uvx",
-    "args": [
-      "alibabacloud-rds-openapi-mcp-server@latest"
-    ],
-    "env": {
-      "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
-      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
-      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token" // 可选项，使用sts token鉴权时填写
-    }
-  }
+{
+	"mcpServers": {
+		"rds-openapi": {
+			"name": "rds-openapi",
+			"type": "stdio",
+			"description": "",
+			"isActive": true,
+			"registryUrl": "",
+			"command": "uvx",
+			"args": [
+				"alibabacloud-rds-openapi-mcp-server@latest"
+			],
+			"env": {
+				"ALIBABA_CLOUD_ACCESS_KEY_ID": "$you_access_id",
+				"ALIBABA_CLOUD_ACCESS_KEY_SECRET": "$you_access_key"
+			}
+		}
+	}
 }
 ```
+
+4. 最后点击开启MCP
+<img src="./assets/mcp_turn_on.png" alt="mcp_turn_on"/>
+
+5. 您可以使用我们下面提供的提示词模板，提升使用体验。
+
 
 ### 使用Cline
 设置环境变量并运行MCP服务

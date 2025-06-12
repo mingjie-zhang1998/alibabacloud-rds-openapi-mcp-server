@@ -10,23 +10,41 @@ MCP server for RDS Services via OPENAPI
 
 ## Quick Start
 ### Using [cherry-studio](https://github.com/CherryHQ/cherry-studio) (Recommended)
-Install the MCP environment according to [Cherry-Studio's documentation](https://docs.cherry-ai.com/advanced-basic/mcp/install), then configure and use RDS MCP.
-Add the following configuration to the MCP client configuration file:
+1. Download and install cherry-studio
+2. Follow the [documentation](https://docs.cherry-ai.com/cherry-studio/download) to install uv, which is required for the MCP environment
+3. Configure and use RDS MCP according to the [documentation](https://docs.cherry-ai.com/advanced-basic/mcp/install). You can quickly import the RDS MCP configuration using the JSON below. Please set ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET to your Alibaba Cloud AK/SK.
+
+> The following error may appear during import, which can be ignored:
+> xxx settings.mcp.addServer.importFrom.connectionFailed
+
+<img src="./assets/cherry-config.png" alt="cherry_config"/>
+
 ```json5
-"mcpServers": {
-  "rds-openapi-mcp-server": {
-    "command": "uvx",
-    "args": [
-      "alibabacloud-rds-openapi-mcp-server@latest"
-    ],
-    "env": {
-      "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
-      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
-      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token" // optional, required when using STS Token 
-    }
-  }
+{
+	"mcpServers": {
+		"rds-openapi": {
+			"name": "rds-openapi",
+			"type": "stdio",
+			"description": "",
+			"isActive": true,
+			"registryUrl": "",
+			"command": "uvx",
+			"args": [
+				"alibabacloud-rds-openapi-mcp-server@latest"
+			],
+			"env": {
+				"ALIBABA_CLOUD_ACCESS_KEY_ID": "$you_access_id",
+				"ALIBABA_CLOUD_ACCESS_KEY_SECRET": "$you_access_key"
+			}
+		}
+	}
 }
 ```
+
+4. Finally, click to turn on MCP
+<img src="./assets/mcp_turn_on.png" alt="mcp_turn_on"/>
+
+5. You can use the prompt template provided below to enhance your experience.
 
 ### Using Cline
 Set you env and run mcp server.
