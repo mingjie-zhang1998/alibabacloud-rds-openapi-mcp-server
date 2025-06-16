@@ -2,12 +2,15 @@ import json
 import logging
 import os
 import sys
-import csv
+import time
 from datetime import datetime
 from typing import Dict, Any, List
 
 from alibabacloud_bssopenapi20171214 import models as bss_open_api_20171214_models
+from alibabacloud_openapi_util.client import Client as OpenApiUtilClient
 from alibabacloud_rds20140815 import models as rds_20140815_models
+from alibabacloud_tea_openapi import models as open_api_models
+from alibabacloud_tea_util import models as util_models
 from alibabacloud_vpc20160428 import models as vpc_20160428_models
 from mcp.server.fastmcp import FastMCP
 
@@ -19,7 +22,7 @@ from utils import (transform_to_iso_8601,
                    json_array_to_csv,
                    get_rds_client,
                    get_vpc_client,
-                   get_bill_client)
+                   get_bill_client, get_das_client, convert_datetime_to_timestamp)
 
 logger = logging.getLogger(__name__)
 
@@ -1348,6 +1351,84 @@ async def restart_db_instance(
     except Exception as e:
         logger.error(f"Error occurred while restarting instance: {str(e)}")
         raise OpenAPIError(f"Failed to restart RDS instance: {str(e)}")
+
+
+@mcp.tool()
+async def describe_sql_insight_statistic(
+        dbinstance_id: str,
+        start_time: str,
+        end_time: str,
+) -> Dict[str, Any]:
+    """
+    Query SQL Log statistics, including SQL cost time, execution times, and account.
+    Args:
+        dbinstance_id (str): The ID of the RDS instance.
+        start_time(str): the start time of sql insight statistic. e.g. 2025-06-06 20:00:00
+        end_time(str): the end time of sql insight statistic. e.g. 2025-06-06 20:10:00
+    Returns:
+        the sql insight statistic information in csv format.
+    """
+    def _descirbe(order_by: str):
+        try:
+        # Initialize client
+            client = get_das_client()
+            page_no = 1
+            page_size = 50
+            total = page_no * page_size + 1
+            result = []
+            while total > page_no * page_size:
+                state = "RUNNING"
+                job_id = ""
+                while state == "RUNNING":
+                    body = {
+                        "InstanceId": dbinstance_id,
+                        "OrderBy": order_by,
+                        "Asc": False,
+                        "PageNo": 1,
+                        "PageSize": 10,
+                        "TemplateId": "",
+                        "DbName": "",
+                        "StartTime": convert_datetime_to_timestamp(start_time),
+                        "EndTime": convert_datetime_to_timestamp(end_time),
+                        "JobId": job_id
+                    }
+                    req = open_api_models.OpenApiRequest(
+                        query=OpenApiUtilClient.query({}),
+                        body=OpenApiUtilClient.parse_to_map(body)
+                    )
+                    params = open_api_models.Params(
+                        action='DescribeSqlInsightStatistic',
+                        version='2020-01-16',
+                        protocol='HTTPS',
+                        pathname='/',
+                        method='POST',
+                        auth_type='AK',
+                        style='RPC',
+                        req_body_type='formData',
+                        body_type='json'
+                    )
+                    response = client.call_api(params, req, util_models.RuntimeOptions())
+                    response_data = response['body']['Data']
+                    state = response_data['State']
+                    if state == "RUNNING":
+                        job_id = response_data['ResultId']
+                        time.sleep(1)
+                        continue
+                    if state == "SUCCESS":
+                        result.extend(response_data['Data']['List'])
+                        total = response_data['Data']['Total']
+                        page_no = page_no + 1
+
+            return json_array_to_csv(result)
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            raise e
+    rt_rate = _descirbe("rtRate")
+    count_rate = _descirbe("countRate")
+    return {
+        "sql_log_order_by_rt_rate": rt_rate,
+        "sql_log_order_by_count_rate": count_rate
+    }
 
 
 def main():

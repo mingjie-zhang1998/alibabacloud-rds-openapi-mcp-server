@@ -119,6 +119,7 @@ Add the following configuration to the MCP client configuration file:
 * `describe_error_logs`: Queries the error log of an instance.
 * `describe_instance_linked_whitelist_template`: Query the whitelist template list.
 * `describe_slow_log_records`: Query slow log records for an RDS instance.
+* `describe_sql_insight_statistic`: Query SQL Log statistics, including SQL cost time, execution times, and account.
 * `describe_vpcs`: Query VPC list.
 * `describe_vswitches`: Query VSwitch list.
 * `modify_security_ips`: Modify RDS instance security IP whitelist.

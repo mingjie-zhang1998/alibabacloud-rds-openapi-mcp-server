@@ -119,6 +119,7 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 * `describe_error_logs`: 查询实例错误日志
 * `describe_instance_linked_whitelist_template`: 查询绑定到实例的白名单模板列表
 * `describe_slow_log_records`: 查询RDS实例的慢日志记录
+* `describe_sql_insight_statistic`: 查询实例SQL日志统计，包括SQL耗时、执行次数、账号等
 * `describe_vpcs`: 查询VPC列表
 * `modify_security_ips`: 修改白名单
 * `describe_vswitches`: 查询VSwitch列表

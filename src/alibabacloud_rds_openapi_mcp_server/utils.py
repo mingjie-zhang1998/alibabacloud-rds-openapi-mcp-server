@@ -2,11 +2,14 @@ import csv
 import os
 from datetime import datetime, timezone
 from io import StringIO
+import time
 
 from alibabacloud_bssopenapi20171214.client import Client as BssOpenApi20171214Client
 from alibabacloud_rds20140815.client import Client as RdsClient
 from alibabacloud_tea_openapi.models import Config
 from alibabacloud_vpc20160428.client import Client as VpcClient
+from alibabacloud_das20200116.client import Client as DAS20200116Client
+
 
 PERF_KEYS = {
     "mysql": {
@@ -95,6 +98,13 @@ def json_array_to_csv(data):
     return output.getvalue()
 
 
+def convert_datetime_to_timestamp(date_str):
+    dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+    timestamp_seconds = time.mktime(dt.timetuple())
+    timestamp_milliseconds = int(timestamp_seconds) * 1000
+    return timestamp_milliseconds
+
+
 def get_rds_client(region_id: str):
     config = Config(
         access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
@@ -141,4 +151,18 @@ def get_bill_client(region_id: str):
         read_timeout=300 * 1000
     )
     client = BssOpenApi20171214Client(config)
+    return client
+
+
+def get_das_client():
+    config = Config(
+        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
+        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
+        security_token=os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN'),
+        region_id='cn-shanghai',
+        protocol="https",
+        connect_timeout=10 * 1000,
+        read_timeout=300 * 1000
+    )
+    client = DAS20200116Client(config)
     return client
