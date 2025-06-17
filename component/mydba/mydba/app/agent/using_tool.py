@@ -4,16 +4,13 @@ from typing import Dict, List, Optional
 from tenacity import RetryError
 from mydba.app.agent.base import BaseAgent, cleanup_decorator
 from mydba.app.config.agent import AgentMcp
-from mydba.app.config.mcp_tool import McpToolInfo
 from mydba.app.config.settings import settings
 from mydba.app.llm import ToolChoice
 from mydba.app.message.memory_history import MemoryInfo
 from mydba.app.message.message import Message, ToolCall
-from mydba.app.prompt import using_tool
-from mydba.app.tool.base_local_tool import LocalTool
 from mydba.app.tool.tool_manager import tool_manager
-from mydba.common import stream
 from mydba.common.logger import logger
+from mydba.common.session import get_context
 
 class UsingToolAgent(BaseAgent, BaseModel):
     """
@@ -25,7 +22,7 @@ class UsingToolAgent(BaseAgent, BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
         prompts = data.get("prompts", {})
-        self.prompt_patterns["system"] = prompts.get("system") if prompts and prompts.get("system") else using_tool.SYSTEM_PROMPT
+        self.prompt_patterns["system"] = prompts.get("system")
         self.system_message = Message.system_message(self.prompt_patterns["system"])
 
     @cleanup_decorator
@@ -67,13 +64,15 @@ class UsingToolAgent(BaseAgent, BaseModel):
     async def _execute_model(self, first: bool) -> Message:
         tools = await tool_manager.get_tool_list(filter_=self.mcps)
         tool_choice = ToolChoice.REQUIRED if first and tools else ToolChoice.AUTO
+        context = get_context()
         result = await self.llm.ask_tool(
             messages=self.memory,
             system_msgs=[self.system_message],
             tools=tools,
-            tool_choice=tool_choice
+            tool_choice=tool_choice,
+            stream=context.detail_info,
         )
-        logger.info(f"[{self.name}] query model, first: {first}, result: {result}")
+        #logger.info(f"[{self.name}] query model, first: {first}, result: {result}")
         self.memory.append(result)
         return result
 
@@ -82,8 +81,6 @@ class UsingToolAgent(BaseAgent, BaseModel):
         for tool_call in tool_calls:
             tool_name_infos = await tool_manager.convert_name(tool_call.function.name)
             tool_name = tool_name_infos[1] if len(tool_name_infos) >= 2 else tool_name_infos[0]
-            if tool_name != LocalTool.INTERACTION.value:
-                await stream.aprint(f"[A] {self.name} 执行工具调用 {'::'.join(tool_name_infos)}")
             for i in range(3):
                 try:
                     result = await tool_manager.execute(tool_call.function.name, tool_call.function.arguments)

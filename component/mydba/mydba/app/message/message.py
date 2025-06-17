@@ -54,8 +54,7 @@ class Message(BaseModel):
         formatted_calls = None
         if tool_calls:
             formatted_calls = [
-                {"id": call.id, "function": call.function.model_dump(), "type": "function"}
-                for call in tool_calls
+                {"id": call.id, "function": call.function.model_dump(), "type": "function"} for call in tool_calls
             ]
         if not content and not formatted_calls:
             raise ValueError("content and tool_calls cannot be both None")
