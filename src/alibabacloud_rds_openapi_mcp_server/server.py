@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sys
+import argparse
 import time
 from datetime import datetime
 from typing import Dict, Any, List
@@ -12,7 +13,7 @@ from alibabacloud_rds20140815 import models as rds_20140815_models
 from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_tea_util import models as util_models
 from alibabacloud_vpc20160428 import models as vpc_20160428_models
-from mcp.server.fastmcp import FastMCP
+
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
@@ -23,10 +24,11 @@ from utils import (transform_to_iso_8601,
                    get_rds_client,
                    get_vpc_client,
                    get_bill_client, get_das_client, convert_datetime_to_timestamp)
+from toolsets.toolsets import ToolsetMCP, initialize_toolsets
 
 logger = logging.getLogger(__name__)
 
-mcp = FastMCP("Alibaba Cloud RDS OPENAPI")
+mcp = ToolsetMCP("Alibaba Cloud RDS OPENAPI", port=os.getenv("SERVER_PORT", 8000))
 
 
 class OpenAPIError(Exception):
@@ -1435,10 +1437,37 @@ async def describe_sql_insight_statistic(
     }
 
 
-def main():
-    mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'stdio'))
+def main(toolsets: str | None = None) -> None:
+    """Initialize toolsets and run the MCP server.
+
+    ``toolsets`` takes precedence over the ``MCP_TOOLSETS`` environment
+    variable. If neither is provided, the default tool group is loaded.
+    """
 
 
-if __name__ == '__main__':
-    # Initialize and run the server
-    main()
+    groups = toolsets if toolsets is not None else os.getenv("MCP_TOOLSETS")
+    initialize_toolsets(toolsets=groups, mcp_server=mcp)
+
+
+    import asyncio, json
+    async def _show():
+        tools = await mcp.list_tools()
+        print("MCP registered %d tools:" % len(tools))
+    asyncio.run(_show())
+    print("🎯 MCP 实例 id:", id(mcp))
+    print("🎯 Manager MCP id:", id(mcp.manager._tools))
+
+    mcp.run(transport=os.getenv("SERVER_TRANSPORT", "stdio"))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--toolsets",
+        help="comma separated list of toolset groups to enable",
+    )
+    args = parser.parse_args()
+    main(toolsets=args.toolsets)
+
+
+
