@@ -14,6 +14,8 @@ from alibabacloud_tea_util import models as util_models
 from alibabacloud_vpc20160428 import models as vpc_20160428_models
 from mcp.server.fastmcp import FastMCP
 
+from db_driver.db_service import DBService
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 from utils import (transform_to_iso_8601,
@@ -1433,6 +1435,51 @@ async def describe_sql_insight_statistic(
         "sql_log_order_by_rt_rate": rt_rate,
         "sql_log_order_by_count_rate": count_rate
     }
+
+
+@mcp.tool()
+async def show_engine_innodb_status(
+        dbinstance_id: str,
+        region_id: str
+) -> str:
+    """
+    show engine innodb status in db.
+    Args:
+        dbinstance_id (str): The ID of the RDS instance.
+        region_id(str): the region id of instance.
+    Returns:
+        the sql result.
+    """
+    try:
+        with DBService(region_id, dbinstance_id) as service:
+            return service.execute_sql("show engine innodb status")
+    except Exception as e:
+        logger.error(f"Error occurred: {str(e)}")
+        raise e
+
+@mcp.tool()
+async def show_create_table(
+        region_id: str,
+        dbinstance_id: str,
+        db_name: str,
+        table_name: str
+) -> str:
+    """
+    show create table db_name.table_name
+    Args:
+        dbinstance_id (str): The ID of the RDS instance.
+        region_id(str): the region id of instance.
+        db_name(str): the db name for table.
+        table_name(str): the table name.
+    Returns:
+        the sql result.
+    """
+    try:
+        with DBService(region_id, dbinstance_id, db_name) as service:
+            return service.execute_sql(f"show create table {db_name}.{table_name}")
+    except Exception as e:
+        logger.error(f"Error occurred: {str(e)}")
+        raise e
 
 
 def main():
