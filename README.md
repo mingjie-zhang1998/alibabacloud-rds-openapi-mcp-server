@@ -98,7 +98,7 @@ Add the following configuration to the MCP client configuration file:
 ```
 
 ## Components
-### Tools
+### OpenAPI Tools
 * `add_tags_to_db_instance`: Add tags to an RDS instance.
 * `allocate_instance_public_connection`: Allocate a public connection for an RDS instance.
 * `attach_whitelist_template_to_instance`: Attach a whitelist template to an RDS instance.
@@ -128,6 +128,11 @@ Add the following configuration to the MCP client configuration file:
 * `modify_db_instance_spec`: Modify RDS instance specifications.
 * `modify_parameter`: Modify RDS instance parameters.
 * `restart_db_instance`: Restart an RDS instance.
+### SQL Tools
+> The MCP Server will automatically create a read-only account, execute the SQL statement, and then automatically delete the account. This process requires that the MCP Server can connect to the instance.
+
+* `show_engine_innodb_status`: Execute sql `show engine innodb status` and return sql result.
+* `show_create_table`: Execute sql `show create table` and return sql result.
 
 ### Resources
 None at this time
