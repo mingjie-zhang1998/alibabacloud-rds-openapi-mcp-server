@@ -30,7 +30,7 @@ sys.modules.setdefault("mcp", mcp_stub)
 sys.modules.setdefault("mcp.server", server_pkg_stub)
 sys.modules.setdefault("mcp.server.fastmcp", fastmcp_stub)
 
-from toolsets import (
+from alibabacloud_rds_openapi_mcp_server.toolsets.toolsets import (
     ToolsetMCP,
     initialize_toolsets,
 )
@@ -62,7 +62,7 @@ def make_rds_custom(server):
         "alibabacloud_rds_openapi_mcp_server.toolsets.rds_custom"
     )
 
-    @server.mcp.tool()
+    @server.mcp.tool(group="rds_custom")
     async def custom_echo(text: str):
         return text
 
@@ -82,35 +82,72 @@ def dummy_env(monkeypatch):
 
 def test_load_groups_should_assign_tools_to_correct_groups_when_called(dummy_env):
     server = dummy_env
-    from tools import load_groups
+    from alibabacloud_rds_openapi_mcp_server.toolsets.tool_registry import load_groups
 
-    load_groups(server.toolset_manager, server)
+    load_groups(server.mcp)
 
     groups = server.toolset_manager.groups
     assert "rds" in groups
     assert server.describe_db_instances in [i.func for i in groups["rds"]]
     assert server.describe_db_instance_attribute in [i.func for i in groups["rds"]]
-    assert "custom" in groups
-    assert any(i.func.__name__ == "custom_echo" for i in groups["custom"])
+    assert "rds_custom" in groups
+    assert any(i.func.__name__ == "custom_echo" for i in groups["rds_custom"])
 
 
 def test_initialize_toolsets_should_enable_default_group_when_toolsets_none(dummy_env):
     server = dummy_env
-
-    initialize_toolsets(None)
-
-    assert server.toolset_manager.enabled == {"default"}
+    initialize_toolsets(None, server.mcp)
+    assert server.toolset_manager.enabled == {"rds"}
 
 
 def test_manager_should_report_enabled_groups_and_tools_when_queried(dummy_env):
     server = dummy_env
-    from tools import load_groups
+    from alibabacloud_rds_openapi_mcp_server.toolsets.tool_registry import load_groups
 
-    load_groups(server.toolset_manager, server)
-    server.toolset_manager.enable("rds", "custom")
+    load_groups(server.mcp)
+    server.toolset_manager.enable("rds", "rds_custom")
 
-    assert set(server.toolset_manager.get_registered_groups()) >= {"default", "rds", "custom"}
-    assert set(server.toolset_manager.get_enabled_groups()) == {"rds", "custom"}
-    enabled = server.toolset_manager.get_enabled_tools()
+    assert set(server.toolset_manager.registered_tool_groups()) >= {"rds", "rds_custom"}
+    assert set(server.toolset_manager.enabled_tool_groups()) == {"rds", "rds_custom"}
+    enabled = server.toolset_manager.enabled_tools()
     assert "rds" in enabled and server.describe_db_instances in enabled["rds"]
-    assert "custom" in enabled and any(f.__name__ == "custom_echo" for f in enabled["custom"])
+    assert "rds_custom" in enabled and any(
+        f.__name__ == "custom_echo" for f in enabled["rds_custom"]
+    )
+
+def test_set_group_should_move_tool_to_new_group_when_called(dummy_env):
+    manager = dummy_env.toolset_manager
+
+    def new_tool():
+        pass
+
+    manager.add_tool(new_tool)
+    manager.set_group(new_tool, "new_group")
+
+    assert "new_group" in manager.groups
+    assert new_tool in [i.func for i in manager.groups["new_group"]]
+    assert all(i.func != new_tool for i in manager.groups["rds"])
+
+
+def test_register_enabled_should_register_only_tools_from_enabled_groups(dummy_env):
+    manager = dummy_env.toolset_manager
+
+    async def tool_a():
+        pass
+
+    async def tool_b():
+        pass
+
+    manager.add_tool(tool_a, group="group_a")
+    manager.add_tool(tool_b, group="group_b")
+
+    manager.enable("group_a")
+    manager.register_enabled(dummy_env.mcp)
+
+    assert tool_a in dummy_env.mcp._tools
+    assert tool_b not in dummy_env.mcp._tools
+
+
+def test_initialize_toolsets_should_raise_when_group_invalid(dummy_env):
+    with pytest.raises(ValueError):
+        initialize_toolsets("invalid_group", dummy_env.mcp)
