@@ -129,6 +129,34 @@ Add the following configuration to the MCP client configuration file:
 * `modify_parameter`: Modify RDS instance parameters.
 * `restart_db_instance`: Restart an RDS instance.
 
+### Toolsets
+
+Toolsets group available MCP tools so you can enable only what you need. Configure toolsets when starting the server using either:
+
+- **Command line**: `--toolsets` parameter
+- **Environment variable**: `MCP_TOOLSETS`
+
+#### Format
+Use comma-separated toolset names (no spaces around commas):
+```
+rds,rds_mssql_custom
+```
+
+#### Examples
+```bash
+# Single toolset
+--toolsets rds
+
+# Multiple toolsets
+--toolsets rds,rds_mssql_custom
+
+# Environment variable
+export MCP_TOOLSETS=rds,rds_mssql_custom
+```
+
+#### Default Behavior
+If no toolset is specified, the default `rds` group is loaded automatically.
+
 ### Resources
 None at this time
 

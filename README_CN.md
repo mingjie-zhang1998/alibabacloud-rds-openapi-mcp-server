@@ -129,6 +129,34 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 * `modify_parameter`: 修改RDS实例参数
 * `restart_db_instance`: 重启RDS实例
 
+#### 工具集分组
+
+工具集将可用的 MCP 工具进行分组管理，让你只启用需要的功能。启动服务器时可通过以下方式配置工具集：
+
+- **命令行参数**: `--toolsets` 参数
+- **环境变量**: `MCP_TOOLSETS`
+
+#### 格式
+使用逗号分隔的工具集名称（逗号周围不要空格）：
+```
+rds,rds_custom
+```
+
+#### 示例
+```bash
+# 单个工具集
+--toolsets rds
+
+# 多个工具集
+--toolsets rds,rds_mssql_custom
+
+# 环境变量方式
+export MCP_TOOLSETS=rds,rds_mssql_custom
+```
+
+#### 默认行为
+如果未指定工具集，将自动加载默认的 `rds` 工具组。
+
 ### 资源
 当前暂无资源
 

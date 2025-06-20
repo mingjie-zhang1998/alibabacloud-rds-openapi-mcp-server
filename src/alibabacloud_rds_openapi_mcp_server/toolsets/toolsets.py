@@ -150,12 +150,12 @@ def initialize_toolsets(
     else:
         raise ValueError('toolset parameter should be string, e.g. [rds,rds_custom]')
 
-    available = toolset_manager.registered_tool_groups()
-    invalid = [g for g in enabled if g not in available]
-    if invalid:
+    available_toolset_groups = toolset_manager.registered_tool_groups()
+    invalid_toolset_groups = [g for g in enabled if g not in available_toolset_groups]
+    if invalid_toolset_groups:
         raise ValueError(
-            f"Unknown toolset group(s): [{','.join(sorted(invalid))}] "
-            f"Available groups: [{','.join(sorted(available))}]"
+            f"Unknown toolset group(s): [{','.join(sorted(invalid_toolset_groups))}] "
+            f"Available groups: [{','.join(sorted(available_toolset_groups))}]"
         )
 
     toolset_manager.enable(*enabled)
@@ -163,9 +163,9 @@ def initialize_toolsets(
 
     # Debug output controlled by environment variable
     if os.getenv('TOOLSET_DEBUG', '').lower() in ('1', 'true', 'yes', 'on'):
-        print("📦 All registered groups:", toolset_manager.registered_tool_groups())
-        print("✅ Enabled groups:", toolset_manager.enabled_tool_groups())
-        print("🔧 Actually registered tools:")
+        print("All registered groups:", toolset_manager.registered_tool_groups())
+        print("Enabled groups:", toolset_manager.enabled_tool_groups())
+        print("Actually registered tools:")
         for group, tools in toolset_manager.enabled_tools().items():
             print(f"  - group: {group}")
             for t in tools:
