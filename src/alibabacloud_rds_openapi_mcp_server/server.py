@@ -5,7 +5,7 @@ import sys
 import argparse
 import time
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 from alibabacloud_bssopenapi20171214 import models as bss_open_api_20171214_models
 from alibabacloud_openapi_util.client import Client as OpenApiUtilClient
@@ -1437,27 +1437,19 @@ async def describe_sql_insight_statistic(
     }
 
 
-def main(toolsets: str | None = None) -> None:
-    """Initialize toolsets and run the MCP server.
-
-    ``toolsets`` takes precedence over the ``MCP_TOOLSETS`` environment
-    variable. If neither is provided, the default tool group is loaded.
+def main(toolsets: Optional[str] = None) -> None:
     """
-
-
-    groups = toolsets if toolsets is not None else os.getenv("MCP_TOOLSETS")
-    initialize_toolsets(toolsets=groups, mcp_server=mcp)
-
-
-    import asyncio, json
-    async def _show():
-        tools = await mcp.list_tools()
-        print("MCP registered %d tools:" % len(tools))
-    asyncio.run(_show())
-    print("🎯 MCP 实例 id:", id(mcp))
-    print("🎯 Manager MCP id:", id(mcp.manager._tools))
-
-    mcp.run(transport=os.getenv("SERVER_TRANSPORT", "stdio"))
+    Start the MCP server with specified toolsets.
+    Determines which toolsets to load (parameter > env var > default) and Initializes and registers the selected toolsets
+    Args:
+        toolsets: Comma-separated toolset names (e.g., "rds,custom").
+                 Takes precedence over MCP_TOOLSETS environment variable.
+                 If neither is provided, default toolset(which is rds toolset) is used.
+    """
+    selected_toolsets = toolsets or os.getenv("MCP_TOOLSETS")
+    initialize_toolsets(toolsets=selected_toolsets, mcp_server=mcp)
+    transport = os.getenv("SERVER_TRANSPORT", "stdio")
+    mcp.run(transport=transport)
 
 
 if __name__ == "__main__":
@@ -1468,6 +1460,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     main(toolsets=args.toolsets)
-
-
 

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Tuple
 
 from mcp.server.fastmcp import FastMCP
+import os
 
 DEFAULT_TOOL_GROUP = 'rds'
 
@@ -29,7 +30,7 @@ class ToolsetManager:
     def add_tool(
         self,
         func: Callable,
-        group: str = "default",
+        group: str = DEFAULT_TOOL_GROUP,
         args: Tuple[Any, ...] | None = None,
         kwargs: Dict[str, Any] | None = None,
     ) -> None:
@@ -87,7 +88,6 @@ class ToolsetManager:
         """Register only tools from enabled groups with MCP."""
         for info in self._tools.values():
             if info.group in self.enabled:
-                print(f"🟢 注册工具: {info.func.__name__} 到 MCP")
                 FastMCP.tool(mcp, *info.args, **info.kwargs)(info.func)
 
 
@@ -100,11 +100,10 @@ class ToolsetMCP(FastMCP):
         super().__init__(*args, **kwargs)
 
     '''
-    """
     Decorate a tool and store it for later registration.
 
     This method overrides the mcp.tool() registration mechanism.
-    All tools not explicitly assigned to specific groups in tools.py's
+    All tools not explicitly assigned to specific groups in tool_registry.py's
     load_groups function will be automatically categorized into the
     "rds" group. This ensures that when launching without toolsets
     parameters, these default tools are automatically loaded.
@@ -112,25 +111,16 @@ class ToolsetMCP(FastMCP):
     Note:
         - Tools assigned to "rds" group are loaded when no specific toolsets are specified
         - This provides fallback behavior for uncategorized tools
-    """
-    def tool(self, *dargs: Any, group: str = DEFAULT_TOOL_GROUP, **dkwargs: Any):
-
-        def decorator(func: Callable):
-            self.manager.add_tool(func, group=group, args=dargs, kwargs=dkwargs)
-            return func
-        
-        return decorator
     '''
-
     def tool(self, *dargs: Any, group: str = DEFAULT_TOOL_GROUP, **dkwargs: Any):
         if len(dargs) == 1 and callable(dargs[0]) and not dkwargs:
             func = dargs[0]
             self.manager.add_tool(func, group=group, args=(), kwargs={})
-            return func  # ⬅ 不注册！
+            return func
 
         def decorator(func: Callable):
             self.manager.add_tool(func, group=group, args=dargs, kwargs=dkwargs)
-            return func  # ⬅ 不注册！
+            return func
 
         return decorator
 
@@ -144,11 +134,12 @@ def initialize_toolsets(
 ) -> None:
     """
     Load tool groups and register only the selected group into the MCP instance.
+    Set environment variable TOOLSET_DEBUG=1 to enable debug output.
     """
-    from .tools import load_groups
+    from .tool_registry import load_groups
     toolset_manager = mcp_server.manager
     # Load all tool definitions into manager
-    load_groups(toolset_manager, mcp_server)
+    load_groups(mcp_server)
 
     if toolsets is None:
         enabled = [DEFAULT_TOOL_GROUP]
@@ -170,10 +161,12 @@ def initialize_toolsets(
     toolset_manager.enable(*enabled)
     toolset_manager.register_enabled(mcp_server)
 
-    print("📦 所有注册组:", toolset_manager.registered_tool_groups())
-    print("✅ 启用组:", toolset_manager.enabled_tool_groups())
-    print("🔧 实际注册工具:")
-    for group, tools in toolset_manager.enabled_tools().items():
-        print(f"  - group: {group}")
-        for t in tools:
-            print(f"    • {t.__name__}")
+    # Debug output controlled by environment variable
+    if os.getenv('TOOLSET_DEBUG', '').lower() in ('1', 'true', 'yes', 'on'):
+        print("📦 All registered groups:", toolset_manager.registered_tool_groups())
+        print("✅ Enabled groups:", toolset_manager.enabled_tool_groups())
+        print("🔧 Actually registered tools:")
+        for group, tools in toolset_manager.enabled_tools().items():
+            print(f"  - group: {group}")
+            for t in tools:
+                print(f"    • {t.__name__}")

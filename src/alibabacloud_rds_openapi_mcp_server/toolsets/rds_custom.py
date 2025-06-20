@@ -1,11 +1,4 @@
-
-import os
-import sys
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(current_dir)
-from .tools import tool
-
-
+from .tool_registry import tool
 
 """
 RDS Custom MCP Tools Module
