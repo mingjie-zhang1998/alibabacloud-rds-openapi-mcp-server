@@ -98,7 +98,7 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 ```
 
 ## 功能组件
-### 工具集
+### OpenAPI 工具集
 * `add_tags_to_db_instance`: 添加标签到RDS实例
 * `allocate_instance_public_connection`: 为RDS实例分配公网连接
 * `attach_whitelist_template_to_instance`: 将白名单模板绑定到RDS实例
@@ -128,6 +128,12 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 * `modify_db_instance_spec`: 修改RDS实例规格
 * `modify_parameter`: 修改RDS实例参数
 * `restart_db_instance`: 重启RDS实例
+
+### SQL 工具集
+> MCP Server会自动创建一个只读账号，执行SQL后再自动删除。需要MCP Server能够连通到实例。
+
+* `show_engine_innodb_status`: Execute sql `show engine innodb status` and return sql result.
+* `show_create_table`: Execute sql `show create table` and return sql result.
 
 ### 资源
 当前暂无资源
