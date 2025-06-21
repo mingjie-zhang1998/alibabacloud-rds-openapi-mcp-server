@@ -148,7 +148,7 @@ def initialize_toolsets(
     elif isinstance(toolsets, list):
         enabled = list(toolsets) or [DEFAULT_TOOL_GROUP]
     else:
-        raise ValueError('toolset parameter should be string, e.g. [rds,rds_custom]')
+        raise ValueError('toolset parameter should be string, e.g. [rds,rds_mssql_custom]')
 
     available_toolset_groups = toolset_manager.registered_tool_groups()
     invalid_toolset_groups = [g for g in enabled if g not in available_toolset_groups]

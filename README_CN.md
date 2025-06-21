@@ -139,7 +139,7 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 #### 格式
 使用逗号分隔的工具集名称（逗号周围不要空格）：
 ```
-rds,rds_custom
+rds,rds_mssql_custom
 ```
 
 #### 示例

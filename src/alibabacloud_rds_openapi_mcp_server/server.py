@@ -1442,7 +1442,7 @@ def main(toolsets: Optional[str] = None) -> None:
     Start the MCP server with specified toolsets.
     Determines which toolsets to load (parameter > env var > default) and Initializes and registers the selected toolsets
     Args:
-        toolsets: Comma-separated toolset names (e.g., "rds,rds_custom").
+        toolsets: Comma-separated toolset names (e.g., "rds,rds_mssql_custom").
                  Takes precedence over MCP_TOOLSETS environment variable.
                  If neither is provided, default toolset(which is rds toolset) is used.
     """
