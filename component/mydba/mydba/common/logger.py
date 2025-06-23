@@ -2,7 +2,7 @@
 import os
 from datetime import datetime
 from loguru import logger as _logger
-from mydba.common.session import request_context
+from mydba.common.session import get_context
 from mydba.common.settings import settings
 
 def _custom_rotation(message, file):
@@ -15,7 +15,7 @@ def _custom_rotation(message, file):
     return False
 
 def _formatter(record):
-    context = request_context.get()
+    context = get_context()
     if context:
         record["extra"]["request_id"] = context.request_id
         record["extra"]["user_name"] = context.user_name

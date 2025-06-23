@@ -76,7 +76,15 @@ uv sync --inexact
    data_dir = /usr/local/mydba/vector_store
    ```
 
-2. **初始化 Agent**
+2. **创建日志目录**
+   - 日志目录可以查看配置: [log].dir
+   - 默认路径：`/usr/local/mydba/logs`
+
+   ```shell
+   mkdir /usr/local/mydba/logs
+   ```
+
+3. **初始化 Agent**
    - 执行以下命令以初始化 Agent。请确保您已经正确配置了 **`config_app.ini`** 文件，并用您的阿里云账号替换 `xxxxxx`。
 
    ```shell
@@ -89,7 +97,7 @@ uv sync --inexact
           --rds_access_key xxxxxx                          # 替换为您的阿里云账号密钥
    ```
 
-3. **添加自建数据库**
+4. **添加自建数据库**
    - 执行以下命令以添加自建数据库。请确保您已正确配置 **`config_app.ini`** 文件，并根据实际情况替换 `--db_info` 参数中的数据库连接信息。
 
    ```shell
@@ -100,7 +108,7 @@ uv sync --inexact
           --db_info 'mysql####127.0.0.1##3306##root##123456##utf8mb4##mybase' # 数据库连接信息，注意特殊字符的转义
    ```
 
-4. **初始化 RAG 工具**
+5. **初始化 RAG 工具**
    - 执行以下命令以初始化 RAG 工具。请确保您已经正确配置了 **`config_app.ini`** 文件，并添加了**自建数据库**。
 
    ```shell
@@ -137,4 +145,4 @@ uv sync --inexact
 
 ## 联系我们
 
-- 向上查看 RDS MCP 的 README.md，加入钉钉群。
+- 向上查看 RDS MCP 的 <a href="../../README_CN.md">README_CN.md</a>，加入钉钉群。

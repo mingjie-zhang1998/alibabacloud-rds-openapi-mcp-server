@@ -77,7 +77,15 @@ uv sync --inexact
    data_dir = /usr/local/mydba/vector_store
    ```
 
-2. **Initialize Agent**
+2. **Create Log Directory**
+   - The log directory can be found in the configuration: [log].dir
+   - Default path: /usr/local/mydba/logs
+
+   ```shell
+   mkdir /usr/local/mydba/logs
+   ```
+
+3. **Initialize Agent**
    - Execute the following command to initialize the Agent. Ensure you have correctly configured the **`config_app.ini`** file and replace `xxxxxx` with your Alibaba Cloud account AK/SK.
 
    ```shell
@@ -90,7 +98,7 @@ uv sync --inexact
           --rds_access_key xxxxxx                          # Replace with your Alicloud account secret
    ```
 
-3. **Add Self-Built Database**
+4. **Add Self-Built Database**
    - Execute the following command to add a self-built database. Ensure you have correctly configured the **`config_app.ini`** file and replace `--db_info` parameters with actual database connection details.
 
    ```shell
@@ -101,7 +109,7 @@ uv sync --inexact
           --db_info 'mysql####127.0.0.1##3306##root##123456##utf8mb4##mybase' # Database connection info, pay attention to the escape of special characters
    ```
 
-4. **Initialize RAG Tool**
+5. **Initialize RAG Tool**
    - Execute the following command to initialize the RAG tool. Ensure you have correctly configured the **`config_app.ini`** file and added the **self-built database**.
 
    ```shell
@@ -138,4 +146,4 @@ uv sync --inexact
 
 ## Contact Us
 
-- Welcome joining the DingTalk group for feedback, refer to the README.md of RDS MCP for details.
+- Welcome joining the DingTalk group for feedback, refer to the <a href="../../README.md">README.md</a> of RDS MCP for details.

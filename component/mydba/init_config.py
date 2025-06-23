@@ -14,36 +14,52 @@ from mydba.app.config.agent import AgentMode
 from mydba.app.config.mcp_tool import Transport
 from mydba.app.config.settings import settings as app_settings
 from mydba.app.database.base_database import BaseDatabases
-from mydba.app.prompt import ask_table, reflection, router, using_tool
+from mydba.app.prompt import ask_table, chat, rds_agent, reflection, router
 from mydba.common import encryption
 from mydba.common.global_settings import global_settings
 
 def get_agent_config() -> List[Dict]:
-    """获取 agent 的配置信息，**编辑此部分内容，定制 agent**"""
+    """
+    获取 agent 的配置信息，**编辑此部分内容，定制 agent**<br/>
+    配置项中，prompts 为提示词模版，包含字段:
+    1) system: 系统提示词模版，
+    2) user: 用户提示词模版，在需要改写用户提示词的场景下使用，例如：REFLECTION 模式、ROUTER 模式，
+    3) reflection_system: 反思提示词模版，仅在 REFLECTION 模式下使用，
+    4) reflection_user: 反思提示词模版，仅在 REFLECTION 模式下使用，
+    5) condition: 条件提示词(List)，在意图识别时，描述意图的约束条件，
+    6) shot: 样本提示词(List)，在意图识别时，提供意图样本
+    Returns:
+        List[Dict]: Agent 的配置信息列表
+    """
     main_agent = {
         "name": "main_agent",
         "mode": AgentMode.ROUTER,
         "intent": "识别意图",
         "intent_description": "识别用户的意图，并路由请求到相关 Agent",
         "prompts": {
+            # 系统提示词模版
             "system": router.SYSTEM_PROMPT,
-            "act": router.ACT_PROMPT
+            # 用户提示词模版，意图识别时会改写用户指令
+            "user": router.USER_PROMPT
         },
         "is_main": True,
         "is_default": False
     }
-    rds_agent = {
+    rds_agent_ = {
         "name": "rds_agent",
         "mode": AgentMode.USING_TOOL,
         "intent": "阿里云RDS管理",
         "intent_description": "进行阿里云 RDS 数据库的管理运维，或者对阿里云 RDS 数据库进行问题诊断",
         "prompts": {
-            "system": using_tool.SYSTEM_PROMPT,
+            # 系统提示词模版
+            "system": rds_agent.SYSTEM_PROMPT,
+            # 相关的意图约束条件，集成进意图识别提示词里，用于提升意图识别的准确度
             "condition": 
             [
                 "用户明确希望进行阿里云 RDS 数据库相关的操作时，才能归类到阿里云RDS管理",
                 "用户希望对阿里云 RDS 数据库进行问题诊断时，才能归类到阿里云RDS管理"
             ],
+            # 相关的意图样例，集成进意图识别提示词里，用于提升意图识别的准确度
             "shot": 
             [
                 "查下张北有多少RDS实例",
@@ -63,11 +79,14 @@ def get_agent_config() -> List[Dict]:
         "intent": "数据查询",
         "intent_description": "帮助生成查询计划，执行数据库查询，最后完成数据的统计和分析",
         "prompts": {
+            # 系统提示词模版
             "system": ask_table.SYSTEM_PROMPT,
+            # 相关的意图约束条件，集成进意图识别提示词里，用于提升意图识别的准确度
             "condition": 
             [
                 "用户希望进行数据计算和统计时，要归类到数据查询"
             ],
+            # 相关的意图样例，集成进意图识别提示词里，用于提升意图识别的准确度
             "shot": 
             [
                 "查询集群信息"
@@ -83,19 +102,20 @@ def get_agent_config() -> List[Dict]:
     }
     default_agent = {
         "name": "default_agent",
-        "mode": AgentMode.REFLECTION,
+        "mode": AgentMode.CHAT,
         "intent": "默认",
         "intent_description": "无法匹配用户意图，使用此默认项",
-        "prompts": {"system": reflection.SYSTEM_PROMPT, "act": reflection.ACT_PROMPT, "reflection": reflection.REFLECTION_PROMPT},
+        "prompts": {"system": chat.SYSTEM_PROMPT},
         "is_main": False,
         "is_default": True
     }
-    agents = [main_agent, rds_agent, ask_table_agent, default_agent]
+    agents = [main_agent, rds_agent_, ask_table_agent, default_agent]
     return agents
 
 def get_mcp_config() -> List[Dict]:
     """获取 mcp 服务的配置信息，**编辑此部分内容，添加工具**"""
-    base_dir = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + 'mydba' + os.path.sep + 'mcp'
+    # 目前 RDS MCP 采用代码的相对路径进行配置，如果不符合请手动调整
+    base_dir = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + '..' + os.path.sep + '..' + os.path.sep + '..'
     aliyun_rds_dir = os.path.join(base_dir, 'alibabacloud-rds-openapi-mcp-server', 'src', 'alibabacloud_rds_openapi_mcp_server')
     mcp_aliyun_rds = {
         "name": "rds-openapi-mcp-server",
@@ -463,10 +483,10 @@ def print_args(args: Namespace) -> None:
     for key, value in args.__dict__.items():
         # 过滤敏感信息
         if key.startswith('rds_access'):
-            value = '******' if value else value
+            value = mask_info(value)
         if key == 'db_info':
             v = value.split('##')
-            v[5] = '******' if v[5] else v[5]
+            v[5] = mask_info(v[5])
             value = '##'.join(v)
         # 打印参数
         if isinstance(value, str):
@@ -477,6 +497,13 @@ def print_args(args: Namespace) -> None:
                 print(f"    - {item}")
         else:
             print(f"  {key}: {value}")
+
+def mask_info(info: Optional[str]) -> Optional[str]:
+    if not info:
+        return info
+    if len(info) > 4:
+        return info[:2] + '*' * (len(info) - 4) + info[-2:]
+    return info[:1]+ "**"
 
 if __name__ == "__main__":
     args = parse_arguments()
