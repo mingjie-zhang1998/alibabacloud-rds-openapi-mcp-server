@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 RDS_CUSTOM_GROUP_NAME = 'rds_custom_mssql'
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def describe_rc_instance_ip_address(
+async def describe_rc_instance_ip_address(
     region_id: str,
     instance_id: str,
     ddos_region_id: str,
@@ -61,7 +61,7 @@ def describe_rc_instance_ip_address(
     return AliyunServiceGateway(region_id).rds().describe_rcinstance_ip_address_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def stop_rc_instances(
+async def stop_rc_instances(
     region_id: str,
     instance_ids: List[str],
     force_stop: bool = False,
@@ -88,7 +88,7 @@ def stop_rc_instances(
     return AliyunServiceGateway(region_id).rds().stop_rcinstances_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def start_rc_instances(
+async def start_rc_instances(
     region_id: str,
     instance_ids: List[str],
     batch_optimization: Optional[str] = None
@@ -112,7 +112,7 @@ def start_rc_instances(
     return AliyunServiceGateway(region_id).rds().start_rcinstances_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def reboot_rc_instance(
+async def reboot_rc_instance(
     region_id: str,
     instance_id: str,
     force_stop: bool = False,
@@ -139,7 +139,7 @@ def reboot_rc_instance(
     return AliyunServiceGateway(region_id).rds().reboot_rcinstance_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def describe_rc_image_list(
+async def describe_rc_image_list(
     region_id: str,
     page_number: Optional[int] = None,
     page_size: Optional[int] = None,
@@ -179,7 +179,7 @@ def describe_rc_image_list(
     return AliyunServiceGateway(region_id).rds().describe_rcimage_list_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def describe_rc_metric_list(
+async def describe_rc_metric_list(
     region_id: str,
     instance_id: str,
     metric_name: str,
@@ -225,7 +225,7 @@ def describe_rc_metric_list(
     return AliyunServiceGateway(region_id).rds().describe_rcmetric_list_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def sync_rc_security_group(
+async def sync_rc_security_group(
     region_id: str,
     instance_id: str,
     security_group_id: str
@@ -250,7 +250,7 @@ def sync_rc_security_group(
     return AliyunServiceGateway(region_id).rds().sync_rcsecurity_group_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def associate_eip_address_with_rc_instance(
+async def associate_eip_address_with_rc_instance(
     region_id: str,
     instance_id: str,
     allocation_id: str
@@ -275,7 +275,7 @@ def associate_eip_address_with_rc_instance(
     return AliyunServiceGateway(region_id).rds().associate_eip_address_with_rcinstance_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def unassociate_eip_address_with_rc_instance(
+async def unassociate_eip_address_with_rc_instance(
     region_id: str,
     instance_id: str,
     allocation_id: str
@@ -300,7 +300,7 @@ def unassociate_eip_address_with_rc_instance(
     return AliyunServiceGateway(region_id).rds().unassociate_eip_address_with_rcinstance_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def describe_rc_instance_ddos_count(
+async def describe_rc_instance_ddos_count(
     region_id: str,
     ddos_region_id: str,
     instance_type: str = 'ecs'

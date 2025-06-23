@@ -58,7 +58,7 @@ async def describe_rc_instances(region_id: str, instance_id: str|None) -> Dict[s
     return rds_client.describe_rcinstances_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def describe_rc_instance_attribute(region_id: str,instance_id: str) -> Dict[str, Any]:
+async def describe_rc_instance_attribute(region_id: str,instance_id: str) -> Dict[str, Any]:
     """
     describe a single rds custom instance's details.
 
@@ -76,7 +76,7 @@ def describe_rc_instance_attribute(region_id: str,instance_id: str) -> Dict[str,
     return AliyunServiceGateway(region_id).rds().describe_rcinstance_attribute_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def resize_rc_instance_disk(
+async def resize_rc_instance_disk(
     region_id: str,
     instance_id: str,
     new_size: int,
@@ -110,7 +110,7 @@ def resize_rc_instance_disk(
     return AliyunServiceGateway(region_id).rds().resize_rcinstance_disk_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def describe_rc_instance_vnc_url(
+async def describe_rc_instance_vnc_url(
     region_id: str,
     instance_id: str,
     db_type: str
@@ -134,7 +134,7 @@ def describe_rc_instance_vnc_url(
     return AliyunServiceGateway(region_id).rds().describe_rcinstance_vnc_url_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def modify_rc_instance_attribute(
+async def modify_rc_instance_attribute(
     region_id: str,
     instance_id: str,
     password: Optional[str] = None,
@@ -170,7 +170,7 @@ def modify_rc_instance_attribute(
     return AliyunServiceGateway(region_id).rds().modify_rcinstance_attribute_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-def modify_rc_instance_description(
+async def modify_rc_instance_description(
     region_id: str,
     instance_id: str,
     instance_description: str
