@@ -8,6 +8,7 @@ from mydba.app.message.message import Message
 from mydba.app.prompt import router
 from mydba.common import stream
 from mydba.common.logger import logger
+from mydba.common.session import get_context
 
 class RouterAgent(BaseAgent, BaseModel):
     """
@@ -18,17 +19,22 @@ class RouterAgent(BaseAgent, BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
         prompts = data.get("prompts")
-        self.prompt_patterns["system"] = prompts.get("system") if prompts and prompts.get("system") else router.SYSTEM_PROMPT
-        self.prompt_patterns["act"] = prompts.get("act") if prompts and prompts.get("act") else router.ACT_PROMPT
+        self.prompt_patterns["system"] = prompts.get("system")
+        self.prompt_patterns["user"] = prompts.get("user")
         self.system_message = Message.system_message(self._get_system_prompt())
     
     @cleanup_decorator
     async def run(self, query: str, context_memory: Optional[List[MemoryInfo]] = None) -> str:
-        logger.info(f"[{self.name}] start to detect, query: {query}")
-        # 意图识别，结合历史上下文
-        intent = await self._predict_intent(query, context_memory)
-        await stream.aprint(f"[A] 识别意图: {intent}")
-        agent_info = agent_config.get_agent_by_intent(intent)
+        sub_agents = agent_config.get_sub_agents()
+        if len(sub_agents) == 1:
+            # 只有一个子 Agent，直接使用
+            agent_info = sub_agents[0]
+        else:
+            # 意图识别，结合历史上下文
+            logger.info(f"[{self.name}] start to detect, query: {query}")
+            intent = await self._predict_intent(query, context_memory)
+            await stream.aprint(f"[A] 意图: {intent}")
+            agent_info = agent_config.get_agent_by_intent(intent)
         action_agent = BaseAgent.create_agent(agent_info, self.llm)
         content = await action_agent.run(query, context_memory)
         await self.save_memory_history(system_content=self.system_message.content,
@@ -49,12 +55,13 @@ class RouterAgent(BaseAgent, BaseModel):
             for mem in context_memory:
                 messages.append(Message.user_message(mem.user_content))
                 messages.append(Message.assistant_message(mem.assistant_content))
-        prompt = self._get_act_prompt(query)
+        prompt = self._get_user_prompt(query)
         messages.append(Message.user_message(prompt))
+        context = get_context()
         content = await self.llm.ask(
             messages=messages,
             system_msgs=[self.system_message],
-            stream=True
+            stream=context.detail_info,
         )
         logger.info(f"[{self.name}] detect intent, result: {content}")
         agent_info = agent_config.get_agent_by_intent(content)
@@ -66,16 +73,16 @@ class RouterAgent(BaseAgent, BaseModel):
 
     def _get_system_prompt(self) -> str:
         system_prompt = self.prompt_patterns["system"]
-        agent_list = list(filter(lambda agent: not agent.is_main, agent_config.agent_list))
-        system_prompt = system_prompt.format(intent_infos=router.pack_intent_info(agent_list),
-                                             default_intent=router.pack_default_intent(agent_list),
-                                             intent_names=router.pack_intent_name(agent_list),
-                                             conditions=router.pack_condition(agent_list),
-                                             shots=router.pack_shot(agent_list))
-        logger.debug(f"[{self.name}] system promopt: {system_prompt}")
+        sub_agent_list = agent_config.get_sub_agents()
+        system_prompt = system_prompt.format(intent_infos=router.pack_intent_info(sub_agent_list),
+                                             default_intent=router.pack_default_intent(sub_agent_list),
+                                             intent_names=router.pack_intent_name(sub_agent_list),
+                                             conditions=router.pack_condition(sub_agent_list),
+                                             shots=router.pack_shot(sub_agent_list))
+        logger.debug(f"[{self.name}] system prompt: {system_prompt}")
         return system_prompt
 
-    def _get_act_prompt(self, query: str) -> str:
-        act_prompt = self.prompt_patterns["act"].format(query=query)
-        logger.debug(f"[{self.name}] act promopt: {act_prompt}")
-        return act_prompt
+    def _get_user_prompt(self, query: str) -> str:
+        user_prompt = self.prompt_patterns["user"].format(query=query)
+        logger.debug(f"[{self.name}] user prompt: {user_prompt}")
+        return user_prompt

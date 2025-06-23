@@ -9,7 +9,7 @@ from mydba.app.llm import LLM
 from mydba.app.message import memory_history
 from mydba.app.message.message import Message, ToolCall
 from mydba.app.message.memory_history import MemoryInfo
-from mydba.common.session import request_context
+from mydba.common.session import get_context
 
 def cleanup_decorator(func):
     def wrapper(self, *args, **kwargs):
@@ -30,7 +30,7 @@ class BaseAgent(ABC, BaseModel):
     intent_description: Optional[str] = Field(None, description="意图描述")
     is_main: bool = Field(..., description="是否主 Agent")
     memory: List[Message] = Field(default_factory=list, description="本次处理过程中的短期记忆")
-    prompt_patterns: Dict[str, str] = Field(default_factory=dict)
+    prompt_patterns: Dict[str, str] = Field(default_factory=dict, description="提示词模版，不同类型的 Agent 依赖的提示词模版会有不同")
     llm: LLM = Field(..., description="LLM 实例")
     
     @abstractmethod
@@ -51,7 +51,7 @@ class BaseAgent(ABC, BaseModel):
         Returns:
             list: Agent 的历史 memory。
         """
-        context = request_context.get()
+        context = get_context()
         start_time = datetime.now() - timedelta(minutes=30)
         context_memory = await memory_history.get_memory(user_name=context.user_name, session=context.session,
                                                          agent_name=self.name, start_time=start_time)
@@ -72,7 +72,7 @@ class BaseAgent(ABC, BaseModel):
             assistant_tool_calls (List[ToolCall]): 大模型返回的工具调用。
             tool_contents (List[Dict[str, str]): 工具调用的结果，结果信息的格式为 {"tool_call_id": "xxx", "content": "xxx"}。
         """
-        context = request_context.get()
+        context = get_context()
         await memory_history.save_memory(
             MemoryInfo(
                 time=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -120,10 +120,12 @@ class BaseAgent(ABC, BaseModel):
         Returns:
             BaseAgent: Agent 实例
         """
+        from mydba.app.agent.chat import ChatAgent
         from mydba.app.agent.router import RouterAgent
         from mydba.app.agent.reflection import ReflectionAgent
         from mydba.app.agent.using_tool import UsingToolAgent
         agent_factory = {
+            AgentMode.CHAT.value: ChatAgent,
             AgentMode.ROUTER.value: RouterAgent,
             AgentMode.REFLECTION.value: ReflectionAgent,
             AgentMode.USING_TOOL.value: UsingToolAgent,
