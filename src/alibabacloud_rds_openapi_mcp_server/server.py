@@ -14,9 +14,13 @@ from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_tea_util import models as util_models
 from alibabacloud_vpc20160428 import models as vpc_20160428_models
 
-
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
+
+src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
 from utils import (transform_to_iso_8601,
                    transform_to_datetime,
                    transform_perf_key,
@@ -24,12 +28,17 @@ from utils import (transform_to_iso_8601,
                    get_rds_client,
                    get_vpc_client,
                    get_bill_client, get_das_client, convert_datetime_to_timestamp)
-from toolsets.toolsets import ToolsetMCP, initialize_toolsets
+from alibabacloud_rds_openapi_mcp_server.core.mcp import RdsMCP
+DEFAULT_TOOL_GROUP = 'rds'
+
 
 logger = logging.getLogger(__name__)
-
-mcp = ToolsetMCP("Alibaba Cloud RDS OPENAPI", port=os.getenv("SERVER_PORT", 8000))
-
+mcp = RdsMCP("Alibaba Cloud RDS OPENAPI", port=os.getenv("SERVER_PORT", 8000))
+try:
+    import alibabacloud_rds_openapi_mcp_server.tools
+    import alibabacloud_rds_openapi_mcp_server.prompts
+except Exception as e:
+    print(f"ERROR: Failed to import component packages: {e}")
 
 class OpenAPIError(Exception):
     """Custom exception for RDS OpenAPI related errors."""
@@ -1439,24 +1448,44 @@ async def describe_sql_insight_statistic(
 
 def main(toolsets: Optional[str] = None) -> None:
     """
-    Start the MCP server with specified toolsets.
-    Determines which toolsets to load (parameter > env var > default) and Initializes and registers the selected toolsets
+    Initializes, activates, and runs the MCP server engine.
+
+    This function serves as the main entry point for the application. It
+    orchestrates the entire server lifecycle: determining which component
+    groups to activate based on a clear precedence order, activating them,
+    and finally starting the server's transport layer.
+
+    The component groups to be loaded are determined with the following priority:
+      1. --toolsets command-line argument.
+      2. MCP_TOOLSETS environment variable.
+      3. A default group ('rds') if neither of the above is provided.
+
     Args:
-        toolsets: Comma-separated toolset names (e.g., "rds,rds_mssql_custom").
-                 Takes precedence over MCP_TOOLSETS environment variable.
-                 If neither is provided, default toolset(which is rds toolset) is used.
+        toolsets: A comma-separated string of group names passed from
+                      the command line.
     """
-    selected_toolsets = toolsets or os.getenv("MCP_TOOLSETS")
-    initialize_toolsets(toolsets=selected_toolsets, mcp_server=mcp)
+    source_string = toolsets or os.getenv("MCP_TOOLSETS")
+
+    enabled_groups = _parse_groups_from_source(source_string)
+
+    mcp.activate(enabled_groups=enabled_groups)
+
     transport = os.getenv("SERVER_TRANSPORT", "stdio")
     mcp.run(transport=transport)
+
+
+def _parse_groups_from_source(source: str | None) -> List[str]:
+    if not source:
+        return [DEFAULT_TOOL_GROUP]
+    groups = [g.strip() for g in source.split(",") if g.strip()]
+    return groups or [DEFAULT_TOOL_GROUP]
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--toolsets",
-        help="comma separated list of toolset groups to enable",
+        help="Comma-separated list of toolset groups to enable (e.g., 'rds,rds_custom')."
     )
     args = parser.parse_args()
     main(toolsets=args.toolsets)

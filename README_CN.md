@@ -145,10 +145,10 @@ rds,rds_mssql_custom
 #### 示例
 ```bash
 # 单个工具集
---toolsets rds
+--tools rds
 
 # 多个工具集
---toolsets rds,rds_mssql_custom
+--tools rds,rds_mssql_custom
 
 # 环境变量方式
 export MCP_TOOLSETS=rds,rds_mssql_custom

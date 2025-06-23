@@ -2,7 +2,7 @@
 """Provides core functionalities for the "rds_custom" MCP toolset.
 
 This module contains the engine-agnostic logic and serves as the **required
-base dependency** for all engine-specific toolsets. It can also be loaded
+base dependency** for all engine-specific tools. It can also be loaded
 stand-alone for basic operations.
 
 Toolsets are loaded at runtime via the `--toolsets` command-line argument
@@ -24,14 +24,14 @@ Command-Line Examples:
 # python server.py --toolsets rds_custom
 
 # Scenario 2: Usage for SQL Server
-# python your_server.py --toolsets rds_custom,rds_custom_mssql
+# python server.py --toolsets rds_custom,rds_custom_mssql
 """
 
 import logging
 from typing import Dict, Any, Optional, List
-from .tool_registry import tool
 import alibabacloud_rds20140815.models as RdsApiModels
 from .aliyun_openapi_gateway import AliyunServiceGateway
+from . import tool
 
 
 logger = logging.getLogger(__name__)

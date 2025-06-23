@@ -7,15 +7,14 @@ simultaneously. See the base module's docstring for detailed usage.
 """
 import logging
 from typing import Dict, Any, Optional, List
-from .tool_registry import tool
 import alibabacloud_rds20140815.models as RdsApiModels
+
 from .aliyun_openapi_gateway import AliyunServiceGateway
+from . import tool
 
 logger = logging.getLogger(__name__)
 
-
 RDS_CUSTOM_GROUP_NAME = 'rds_custom_mssql'
-
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
 def describe_rc_instance_ip_address(
