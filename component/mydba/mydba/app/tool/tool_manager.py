@@ -11,9 +11,10 @@ from mydba.app.tool.base_local_tool import LOCAL_TOOL_VALUES, LOCAL_TOOL_TYPE, B
 from mydba.app.tool.interaction import Interaction
 from mydba.app.tool.mcp_tool import McpClient
 from mydba.app.tool.mysql_execution import MySQLExecution
+from mydba.common import stream
 from mydba.common.global_settings import global_settings
 from mydba.common.logger import logger
-from mydba.common.session import request_context
+from mydba.common.session import get_context, set_context, reset_context
 
 RETRYABLE_NAME_PREFIX = ['get', 'describe', 'list']
 
@@ -80,10 +81,24 @@ class ToolManager:
         return [mcp_tool_info.server_name, mcp_tool_info.tool_name]
     
     async def execute(self, name:str, arguments:str) -> str:
+        # 输出工具信息
+        context = get_context()
+        tool_name_infos = await self.convert_name(name)
+        if name != LocalTool.INTERACTION.value:
+            await stream.aprint(f"[A] 执行工具 {'::'.join(tool_name_infos)}")
+            if context.detail_info:
+                await stream.aprint(f"  - 参数: {arguments}")
+        
+        # 执行工具调用
         if name in LOCAL_TOOL_VALUES:
-            return await self._execute_local_tool(name, arguments)
+            result = await self._execute_local_tool(name, arguments)
         else:
-            return await self._execute_mcp_tool(name, arguments)
+            result = await self._execute_mcp_tool(name, arguments)
+        
+        # 输出调用结果
+        if name != LocalTool.INTERACTION.value and context.detail_info:
+            await stream.aprint(f"  - 返回: {result}")
+        return result
 
     async def _execute_local_tool(self, name:LOCAL_TOOL_TYPE, arguments:str) -> str: # type: ignore
         tool = self.local_tool_map.get(name)
@@ -119,9 +134,9 @@ class ToolManager:
 
     async def _wait_refresh(self) -> None:
         if self.last_refresh_time == 0:
-            token = request_context.set(None)
+            token = set_context(None)
             asyncio.create_task(self._refresh_tool_list())
-            request_context.reset(token)
+            reset_context(token)
             logger.info("[tool] tool list is being refreshed...")
             while self.last_refresh_time == 0:
                 logger.info("[tool] Waiting for refreshing to complete")

@@ -7,5 +7,5 @@ async def ainput(prompt=""):
     input = await asyncio.to_thread(session.prompt, prompt)
     return input.rstrip("\n")
 
-async def aprint(*values):
-    print(*values, flush=True)
+async def aprint(*values, sep=" ", end="\n"):
+    print(*values, sep=sep, end=end, flush=True)

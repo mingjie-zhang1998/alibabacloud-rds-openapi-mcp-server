@@ -32,13 +32,14 @@ def kill_process(file_name: str) -> None:
     lines = result.stdout.strip().splitlines()
     
     if len(lines) > 0:
-        pid = lines[0].split()[1]
-        # 使用 kill -9 杀死进程
-        try:
-            print(f"Killing process with PID: {pid}")
-            subprocess.run(f"kill -9 {pid}", shell=True, check=True)
-        except subprocess.CalledProcessError as e:
-            print(f"Failed to kill process {pid}: {e}")
+        for line in lines:
+            pid = line.split()[1]
+            # 使用 kill -9 杀死进程
+            try:
+                print(f"Killing process with PID: {pid}")
+                subprocess.run(f"kill -9 {pid}", shell=True, check=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Failed to kill process {pid}: {e}")
 
 def run_cmd(cmd):
     try:
@@ -101,6 +102,7 @@ if __name__ == "__main__":
 
     init_config_parser = subparsers.add_parser('init-config', help='Initialize the configuration')
     init_config_parser.add_argument('--config_file', required=False, default="/usr/local/mydba/config_app.ini", help='Path to the configuration file')
+    init_config_parser.add_argument('--restart_rag', action='store_true', help='restart the rag tool')
 
     args = parser.parse_args()
     settings.load_config(args.config_file)
@@ -129,5 +131,8 @@ if __name__ == "__main__":
             run_cmd('nohup uv run rag_server.py >> /usr/local/mydba/logs/rag.log 2>&1 &')
     elif args.command == 'init-config':
         asyncio.run(prepare_rag_config(db=settings.CONFIG_DATABASE, key=settings.SECURITY_KEY, vectorstore=vector_store))
+        if args.restart_rag:
+            kill_process('rag_server.py')
+            run_cmd('nohup uv run rag_server.py >> /usr/local/mydba/logs/rag.log 2>&1 &')
     else:
         parser.print_help()

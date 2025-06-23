@@ -6,25 +6,28 @@ from mydba.app.config.settings import settings
 from mydba.app.llm import ToolChoice
 from mydba.app.message.memory_history import MemoryInfo
 from mydba.app.message.message import Message
-from mydba.app.prompt import reflection
 from mydba.app.tool.base_local_tool import LocalTool
 from mydba.app.tool.tool_manager import tool_manager
 from mydba.common import stream
 from mydba.common.logger import logger
+from mydba.common.session import get_context
 
 class ReflectionAgent(BaseAgent, BaseModel):
     """
     反思型 Agent
     """
-    system_message: Optional[Message] = Field(None, description="反思型 Agent 的系统提示信息")
+    system_message: Optional[Message] = Field(None, description="反思型 Agent 在回答问题时，使用的系统提示信息")
+    reflection_system_message: Optional[Message] = Field(None, description="反思型 Agent 在反思答案时，使用的系统提示信息")
     
     def __init__(self, **data):
         super().__init__(**data)
         prompts = data.get("prompts", {})
-        self.prompt_patterns["system"] = prompts.get("system") if prompts and prompts.get("system") else reflection.SYSTEM_PROMPT
-        self.prompt_patterns["act"] = prompts.get("act") if prompts and prompts.get("act") else reflection.ACT_PROMPT
-        self.prompt_patterns["reflection"] = prompts.get("reflection") if prompts and prompts.get("reflection") else reflection.REFLECTION_PROMPT
+        self.prompt_patterns["system"] = prompts.get("system")
+        self.prompt_patterns["user"] = prompts.get("user")
+        self.prompt_patterns["reflection_system"] = prompts.get("reflection_system")
+        self.prompt_patterns["reflection_user"] = prompts.get("reflection_user")
         self.system_message = Message.system_message(self.prompt_patterns["system"])
+        self.reflection_system_message = Message.system_message(self.prompt_patterns["reflection_system"])
 
     @cleanup_decorator
     async def run(self, query: str, context_memory: Optional[List[MemoryInfo]] = None) -> str:
@@ -65,9 +68,10 @@ class ReflectionAgent(BaseAgent, BaseModel):
         Returns:
             str: 执行结果
         """
+        context = get_context()
         await stream.aprint(f"[A] {self.name} 执行中...")
         messages = self.format_memory(context_memory) if context_memory else []
-        prompt = query if not reflection else self._get_act_prompt(query, answer, reflection)
+        prompt = query if not reflection else self._get_user_prompt(query, answer, reflection)
         messages.append(Message.user_message(prompt))
         # 带上 interactive tool，实现 llm 和用户的交互
         tool = tool_manager.get_local_tool(LocalTool.INTERACTION)
@@ -77,9 +81,10 @@ class ReflectionAgent(BaseAgent, BaseModel):
                 messages=messages,
                 system_msgs=[self.system_message],
                 tools=[tool],
-                tool_choice=ToolChoice.AUTO
+                tool_choice=ToolChoice.AUTO,
+                stream=context.detail_info,
             )
-            logger.info(f"[{self.name}] act, result: {llm_result}")
+            #logger.info(f"[{self.name}] act, result: {llm_result}")
             if not llm_result.tool_calls:
                 # 不需要调用工具，返回结果
                 new_answer = llm_result.content
@@ -107,25 +112,26 @@ class ReflectionAgent(BaseAgent, BaseModel):
         Returns:
             str: 反思内容
         """
+        context = get_context()
         await stream.aprint(f"[A] {self.name} 反思中...")
-        prompt = self._get_reflection_prompt(query, content)
+        prompt = self._get_reflection_user_prompt(query, content)
         message = Message.user_message(prompt)
         content = await self.llm.ask(
             messages=[message],
-            system_msgs=[self.system_message],
-            stream=True
+            system_msgs=[self.reflection_system_message],
+            stream=context.detail_info,
         )
-        logger.info(f"[{self.name}] reflect, result: {content}")
-        await self.save_memory_history(system_content=self.system_message.content,
+        #logger.info(f"[{self.name}] reflect, result: {content}")
+        await self.save_memory_history(system_content=self.reflection_system_message.content,
                                        user_content=prompt, assistant_content=content)
         return None if content=="None" else content
     
-    def _get_act_prompt(self, query: str, content: str, reflection: str) -> str:
-        act_prompt = self.prompt_patterns["act"].format(query=query, content=content, reflection=reflection)
-        logger.debug(f"[{self.name}] act promopt: {act_prompt}")
-        return act_prompt
+    def _get_user_prompt(self, query: str, content: str, reflection: str) -> str:
+        user_prompt = self.prompt_patterns["user"].format(query=query, content=content, reflection=reflection)
+        logger.debug(f"[{self.name}] user prompt: {user_prompt}")
+        return user_prompt
     
-    def _get_reflection_prompt(self, query: str, content: str) -> str:
-        reflection_prompt = self.prompt_patterns["reflection"].format(query=query, content=content)
-        logger.debug(f"[{self.name}] reflection promopt: {reflection_prompt}")
-        return reflection_prompt
+    def _get_reflection_user_prompt(self, query: str, content: str) -> str:
+        reflection_user_prompt = self.prompt_patterns["reflection_user"].format(query=query, content=content)
+        logger.debug(f"[{self.name}] reflection user prompt: {reflection_user_prompt}")
+        return reflection_user_prompt
