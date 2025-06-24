@@ -1483,7 +1483,7 @@ async def show_create_table(
 
 
 def main():
-    mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'stdio'))
+    mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'sse'))
 
 
 if __name__ == '__main__':
