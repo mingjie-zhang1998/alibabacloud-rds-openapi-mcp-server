@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 RDS_CUSTOM_GROUP_NAME = 'rds_custom'
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-async def describe_rc_instances(region_id: str, instance_id: str|None) -> Dict[str, Any]:
+async def describe_rc_instances(region_id: str, instance_id: str|None = None) -> Dict[str, Any]:
     """
     describe rds custom instances.
 

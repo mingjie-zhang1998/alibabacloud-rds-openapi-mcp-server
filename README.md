@@ -150,10 +150,10 @@ rds,rds_mssql_custom
 #### Examples
 ```bash
 # Single toolset
---tools rds
+--toolsets rds
 
 # Multiple tools
---tools rds,rds_mssql_custom
+--toolsets rds,rds_mssql_custom
 
 # Environment variable
 export MCP_TOOLSETS=rds,rds_mssql_custom
