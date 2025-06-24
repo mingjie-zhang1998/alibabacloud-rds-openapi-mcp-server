@@ -13,7 +13,7 @@ from mydba.app.config.settings import settings
 from mydba.app.llm import LLM
 from mydba.common import stream
 from mydba.common.logger import logger
-from mydba.common.session import request_context, RequestContext
+from mydba.common.session import get_context, set_context, reset_context, RequestContext
 from mydba.provider.base import BaseProvider
 
 class CommandLineProvider(BaseProvider, BaseModel):
@@ -31,13 +31,18 @@ class CommandLineProvider(BaseProvider, BaseModel):
                 logger.info(f"[cmd] get user query: {query}")
                 agent = self._get_main_agent()
                 context_memory = await agent.get_history_memory()
+                has_error = True
                 try:
                     content = await agent.run(query=query, context_memory=context_memory)
+                    has_error = False
                 except RetryError as re:
-                    content = f"发生错误: {str(re.last_attempt.exception())}"
+                    content = str(re.last_attempt.exception())
                 except Exception as e:
-                    content = f"发生错误: {str(e)}"
-                await self._send_response(content)
+                    content = str(e)
+                if has_error:
+                    await stream.aprint(f"[A] 查询异常: \n{content}")
+                elif not context.detail_info:
+                    await self._send_response(content)
 
     def get_user_info(self) -> str:
         return pwd.getpwuid(os.getuid()).pw_name
@@ -63,7 +68,7 @@ class CommandLineProvider(BaseProvider, BaseModel):
         return f'{tty_name}_{sid}'
     
     def _get_main_agent(self) -> BaseAgent:
-        main_agent_info = next(filter(lambda agent: agent.is_main, agent_config.agent_list), None)
+        main_agent_info = agent_config.get_main_agent()
         if main_agent_info is None:
             logger.error("[cmd] main agent not found")
             raise Exception("main agent not found")
@@ -74,7 +79,7 @@ class CommandLineProvider(BaseProvider, BaseModel):
     
     async def _get_query(self) -> Optional[str]:
         while True:
-            await stream.aprint("[A] 输入查询:")
+            await stream.aprint("[A] 输入指令:")
             try:
                 query = await stream.ainput(">> ")
             except KeyboardInterrupt:
@@ -94,57 +99,62 @@ class CommandLineProvider(BaseProvider, BaseModel):
             bool: 是否继续输入
             str: 处理后的查询内容
         """
-        if not query:
-            if await self._confirm_quit(query):
-                return False, None
-            else:
-                return True, None
+        if not query.strip():
+            return True, None
         if await self._handle_quit(query):
             return False, None
+        if await self._handle_detail_info(query):
+            return True, None
         if await self._handle_session(query):
             return True, None
         if await self._handle_help(query):
             return True, None
         return False, query.strip()
     
-    async def _confirm_quit(self, query: str) -> bool:
-        await stream.aprint("[A] 确认退出么？[Y/N]")
-        confirm = await stream.ainput(">> ")
-        if not confirm:
-            return False
-        confirm = confirm.strip()
-        if confirm and (confirm == 'Y' or confirm == 'y'):
+    async def _handle_quit(self, query: str) -> bool:
+        query = query.strip().lower()
+        if query in ["/exit", "/quit", "/e", "/q"]:
             return True
         return False
     
-    async def _handle_quit(self, query: str) -> bool:
-        if query.lower() in ["/exit", "/quit", "/e", "/q"]:
+    async def _handle_detail_info(self, query: str) -> bool:
+        context = get_context()
+        query = query.strip().lower()
+        if query in ["/i", "/info"]:
+            context.detail_info = not context.detail_info
+            if context.detail_info:
+                await stream.aprint(f"开启详细信息")
+            else:
+                await stream.aprint(f"关闭详细信息")
             return True
         return False
     
     async def _handle_session(self, query: str) -> bool:
-        if query.lower().startswith('/s ') or query.lower() == '/s':
+        query = query.strip().lower()
+        if query.startswith('/s ') or query == '/s':
             items = query.split(" ")
             session = next((s for s in items[1:] if s), None)
-            context = request_context.get()
+            context = get_context()
             if session:
                 await stream.aprint(f"切换会话: {session}")
                 context.session = session
             else:
-                usage = f"切换会话失败，当前会话: {context.session}\n使用方法: /s [session_name]"
+                usage = f"当前会话: {context.session}\n切换方法: /s [session_name]"
                 await stream.aprint(f"{usage}")
             return True
         return False
     
     async def _handle_help(self, query: str) -> bool:
-        if query.lower() in ["/help", "/h", "/?", "/？"]:
+        query = query.strip().lower()
+        if query in ["/help", "/h", "/?", "/？"]:
             await self._welcome_message()
             return True
         if query.startswith('/'):
             await stream.aprint("快捷命令有误")
-            await stream.aprint("输入 [/e] 或 [/q] 退出助手")
-            await stream.aprint("输入 [/s] 切换会话，默认 `default`")
             await stream.aprint("输入 [/h] 或 [/?] 查看帮助")
+            await stream.aprint("输入 [/e] 或 [/q] 退出助手")
+            await stream.aprint("输入 [/i] 关闭或打开详细信息")
+            await stream.aprint("输入 [/s] 切换会话，默认 `default`")
             return True
         return False
     
@@ -153,9 +163,10 @@ class CommandLineProvider(BaseProvider, BaseModel):
         await stream.aprint("欢迎使用阿里云数据库智能助手 MyDBA")
         await stream.aprint(f"我能帮您：{functions}")
         await stream.aprint("快捷命令:")
-        await stream.aprint("输入 [/e] 或 [/q] 退出助手")
-        await stream.aprint("输入 [/s session] 切换会话，默认 `default`")
         await stream.aprint("输入 [/h] 或 [/?] 查看帮助")
+        await stream.aprint("输入 [/e] 或 [/q] 退出助手")
+        await stream.aprint("输入 [/i] 关闭或打开详细信息")
+        await stream.aprint("输入 [/s session] 切换会话，默认 `default`")
 
     async def _send_response(self, content: str) -> None:
         await stream.aprint(f"[A] 查询结果: \n{content}")
@@ -166,6 +177,6 @@ class CommandLineProvider(BaseProvider, BaseModel):
         context = RequestContext(request_id=self.get_request_info(),
                                  user_name=self.get_user_info(),
                                  session=self.get_session())
-        token = request_context.set(context)
+        token = set_context(context)
         yield context
-        request_context.reset(token)
+        reset_context(token)
