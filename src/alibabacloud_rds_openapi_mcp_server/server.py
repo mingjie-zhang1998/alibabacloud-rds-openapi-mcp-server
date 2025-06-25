@@ -15,7 +15,6 @@ from alibabacloud_rds20140815 import models as rds_20140815_models
 from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_tea_util import models as util_models
 from alibabacloud_vpc20160428 import models as vpc_20160428_models
-from db_service import DBService
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
