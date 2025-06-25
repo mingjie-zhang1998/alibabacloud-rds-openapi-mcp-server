@@ -49,6 +49,22 @@ PERF_KEYS = {
 }
 
 
+def parse_args(argv):
+    args = {}
+    i = 1
+    while i < len(argv):
+        arg = argv[i]
+        if arg.startswith('--'):
+            key = arg[2:]
+            if i + 1 < len(argv) and not argv[i + 1].startswith('--'):
+                args[key] = argv[i+1]
+                i += 2
+            else:
+                args[key] = True
+                i += 1
+    return args
+
+
 def transform_to_iso_8601(dt: datetime, timespec: str):
     return dt.astimezone(timezone.utc).isoformat(timespec=timespec).replace("+00:00", "Z")
 

@@ -34,7 +34,6 @@ from utils import (transform_to_iso_8601,
 from alibabacloud_rds_openapi_mcp_server.core.mcp import RdsMCP
 DEFAULT_TOOL_GROUP = 'rds'
 
-
 logger = logging.getLogger(__name__)
 mcp = RdsMCP("Alibaba Cloud RDS OPENAPI", port=os.getenv("SERVER_PORT", 8000))
 try:
@@ -1527,7 +1526,6 @@ def _parse_groups_from_source(source: str | None) -> List[str]:
         return [DEFAULT_TOOL_GROUP]
     groups = [g.strip() for g in source.split(",") if g.strip()]
     return groups or [DEFAULT_TOOL_GROUP]
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
