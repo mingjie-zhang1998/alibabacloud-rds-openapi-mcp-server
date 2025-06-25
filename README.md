@@ -134,6 +134,34 @@ Add the following configuration to the MCP client configuration file:
 * `show_engine_innodb_status`: Execute sql `show engine innodb status` and return sql result.
 * `show_create_table`: Execute sql `show create table` and return sql result.
 
+### Toolsets
+
+Toolsets group available MCP tools so you can enable only what you need. Configure toolsets when starting the server using either:
+
+- **Command line**: `--toolsets` parameter
+- **Environment variable**: `MCP_TOOLSETS`
+
+#### Format
+Use comma-separated toolset names (no spaces around commas):
+```
+rds,rds_mssql_custom
+```
+
+#### Examples
+```bash
+# Single toolset
+--toolsets rds
+
+# Multiple tools
+--toolsets rds,rds_mssql_custom
+
+# Environment variable
+export MCP_TOOLSETS=rds,rds_mssql_custom
+```
+
+#### Default Behavior
+If no toolset is specified, the default `rds` group is loaded automatically.
+
 ### Resources
 None at this time
 
