@@ -2,9 +2,7 @@ import json
 import logging
 import os
 import sys
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_dir = os.path.dirname(current_dir)
-sys.path.append(project_dir)
+sys.path.append("../..")
 
 import time
 from datetime import datetime
@@ -17,11 +15,8 @@ from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_tea_util import models as util_models
 from alibabacloud_vpc20160428 import models as vpc_20160428_models
 from mcp.server.fastmcp import FastMCP
-
 from db_driver.db_service import DBService
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(current_dir)
 from utils import (transform_to_iso_8601,
                    transform_to_datetime,
                    transform_perf_key,
