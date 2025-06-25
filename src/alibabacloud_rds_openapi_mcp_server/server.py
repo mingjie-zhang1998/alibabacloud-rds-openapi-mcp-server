@@ -24,11 +24,12 @@ from utils import (transform_to_iso_8601,
                    json_array_to_csv,
                    get_rds_client,
                    get_vpc_client,
-                   get_bill_client, get_das_client, convert_datetime_to_timestamp)
+                   get_bill_client, get_das_client, convert_datetime_to_timestamp,
+                   parse_args)
 
 logger = logging.getLogger(__name__)
 
-mcp = FastMCP("Alibaba Cloud RDS OPENAPI")
+mcp = FastMCP("Alibaba Cloud RDS OPENAPI", **(parse_args(sys.argv)))
 
 
 class OpenAPIError(Exception):
@@ -1483,7 +1484,7 @@ async def show_create_table(
 
 
 def main():
-    mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'sse'))
+    mcp.run(transport=os.getenv('SERVER_TRANSPORT', 'stdio'))
 
 
 if __name__ == '__main__':
