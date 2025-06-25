@@ -3,6 +3,8 @@ import logging
 import os
 import sys
 import argparse
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
 import time
 from datetime import datetime
 from typing import Dict, Any, List, Optional
@@ -13,8 +15,7 @@ from alibabacloud_rds20140815 import models as rds_20140815_models
 from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_tea_util import models as util_models
 from alibabacloud_vpc20160428 import models as vpc_20160428_models
-
-from db_driver.db_service import DBService
+from db_service import DBService
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
@@ -23,6 +24,7 @@ src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
+from db_service import DBService
 from utils import (transform_to_iso_8601,
                    transform_to_datetime,
                    transform_perf_key,

@@ -3,7 +3,6 @@ import random
 import socket
 import string
 
-import psycopg2
 import pymysql
 from alibabacloud_rds20140815 import models as rds_20140815_models
 
@@ -173,6 +172,7 @@ class DBConn:
                 cursorclass=pymysql.cursors.DictCursor
             )
         elif self.dbtype == 'postgresql' or self.dbtype == 'pg':
+            import psycopg2
             self.conn = psycopg2.connect(
                 host=self.host, port=self.port,
                 user=self.user, password=self.password,
