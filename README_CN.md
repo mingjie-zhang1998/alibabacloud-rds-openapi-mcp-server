@@ -143,6 +143,14 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 rds,rds_mssql_custom
 ```
 
+#### 可用工具集
+以下是工具集及其功能的列表：
+
+- **rds**：启用标准托管 RDS 服务的所有工具
+- **rds_custom_read**：为 RDS Custom 启用只读工具
+- **rds_custom_all**：为 RDS Custom 启用所有工具
+
+
 #### 示例
 ```bash
 # 单个工具集

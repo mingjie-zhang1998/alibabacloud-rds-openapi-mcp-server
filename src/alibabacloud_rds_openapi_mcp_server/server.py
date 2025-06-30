@@ -1522,10 +1522,19 @@ def main(toolsets: Optional[str] = None) -> None:
 
 
 def _parse_groups_from_source(source: str | None) -> List[str]:
+    GROUP_EXPANSIONS = {
+        "rds_custom_all": ["rds_custom_read", "rds_custom_action"],
+    }
     if not source:
         return [DEFAULT_TOOL_GROUP]
-    groups = [g.strip() for g in source.split(",") if g.strip()]
-    return groups or [DEFAULT_TOOL_GROUP]
+    initial_groups = [g.strip() for g in source.split(",") if g.strip()]
+    expanded_groups = []
+    for group in initial_groups:
+        groups_to_add = GROUP_EXPANSIONS.get(group, [group])
+        for g_to_add in groups_to_add:
+            if g_to_add not in expanded_groups:
+                expanded_groups.append(g_to_add)
+    return expanded_groups or [DEFAULT_TOOL_GROUP]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

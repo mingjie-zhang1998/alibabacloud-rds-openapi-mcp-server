@@ -21,23 +21,23 @@ MCP server for RDS Services via OPENAPI
 
 ```json5
 {
-	"mcpServers": {
-		"rds-openapi": {
-			"name": "rds-openapi",
-			"type": "stdio",
-			"description": "",
-			"isActive": true,
-			"registryUrl": "",
-			"command": "uvx",
-			"args": [
-				"alibabacloud-rds-openapi-mcp-server@latest"
-			],
-			"env": {
-				"ALIBABA_CLOUD_ACCESS_KEY_ID": "$you_access_id",
-				"ALIBABA_CLOUD_ACCESS_KEY_SECRET": "$you_access_key"
-			}
-		}
-	}
+  "mcpServers": {
+    "rds-openapi": {
+      "name": "rds-openapi",
+      "type": "stdio",
+      "description": "",
+      "isActive": true,
+      "registryUrl": "",
+      "command": "uvx",
+      "args": [
+        "alibabacloud-rds-openapi-mcp-server@latest"
+      ],
+      "env": {
+        "ALIBABA_CLOUD_ACCESS_KEY_ID": "$you_access_id",
+        "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "$you_access_key"
+      }
+    }
+  }
 }
 ```
 
@@ -79,19 +79,22 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 ```
 Add the following configuration to the MCP client configuration file:
 ```json5
-"mcpServers": {
-  "rds-openapi-mcp-server": {
-    "command": "uv",
-    "args": [
-      "--directory",
-      "/path/to/alibabacloud-rds-openapi-mcp-server/src/alibabacloud_rds_openapi_mcp_server",
-      "run",
-      "server.py"
-    ],
-    "env": {
-      "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
-      "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
-      "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token"  // optional, required when using STS Token
+{
+  "mcpServers": {
+    "rds-openapi-mcp-server": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/path/to/alibabacloud-rds-openapi-mcp-server/src/alibabacloud_rds_openapi_mcp_server",
+        "run",
+        "server.py"
+      ],
+      "env": {
+        "ALIBABA_CLOUD_ACCESS_KEY_ID": "access_id",
+        "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "access_key",
+        "ALIBABA_CLOUD_SECURITY_TOKEN": "sts_security_token",
+        // optional, required when using STS Token
+      }
     }
   }
 }
@@ -141,10 +144,20 @@ Toolsets group available MCP tools so you can enable only what you need. Configu
 - **Command line**: `--toolsets` parameter
 - **Environment variable**: `MCP_TOOLSETS`
 
+#### Available Toolsets
+
+Here is a list of toolsets and their functions:
+
+- **rds**: Enables all tools for the standard, managed RDS service
+
+- **rds_custom_read**: Enables read-only tools for the RDS Custom. 
+
+- **rds_custom_all**: Enables full read and write tools for the RDS Custom.
+
 #### Format
 Use comma-separated toolset names (no spaces around commas):
 ```
-rds,rds_mssql_custom
+rds,rds_custom_all
 ```
 
 #### Examples
@@ -156,7 +169,7 @@ rds,rds_mssql_custom
 --toolsets rds,rds_mssql_custom
 
 # Environment variable
-export MCP_TOOLSETS=rds,rds_mssql_custom
+export MCP_TOOLSETS=rds,rds_custom_all
 ```
 
 #### Default Behavior
