@@ -1,79 +1,23 @@
 # -*- coding: utf-8 -*-
-"""Provides core functionalities for the "rds_custom" MCP toolset.
+"""Provides the 'Action' or 'Write-Enabled' functionalities for the 'rds_custom' toolset.
 
-This module contains the engine-agnostic logic and serves as the **required
-base dependency** for all engine-specific tools. It can also be loaded
-stand-alone for basic operations.
+This module, packaged as `rds_custom_action`, contains all interfaces that
+modify resource states (e.g., Create, Stop, Delete).
 
-Toolsets are loaded at runtime via the `--toolsets` command-line argument
-or a corresponding environment variable.
-
-Command-Line Usage:
--------------------
-1.  **Base Usage Only:**
-    To load only the base functionalities, specify `rds_custom` by itself.
-
-2.  **Single-Engine Usage:**
-    To use tools for a specific engine (e.g., SQL Server), you MUST include
-    **both** the base toolset `rds_custom` AND the engine-specific toolset
-    `rds_custom_mssql` in the list, separated by a comma.
-
-Command-Line Examples:
-----------------------
-# Scenario 1: Basic usage with only the base toolset
-# python server.py --toolsets rds_custom
-
-# Scenario 2: Usage for SQL Server
-# python server.py --toolsets rds_custom,rds_custom_mssql
+It serves as an **extension** to the `rds_custom_read` toolset and **cannot
+be used stand-alone**. For detailed loading logic and scenarios, please
+refer to the documentation in the `rds_custom_read` module.
 """
-
 import logging
 from typing import Dict, Any, Optional, List
 import alibabacloud_rds20140815.models as RdsApiModels
+
 from .aliyun_openapi_gateway import AliyunServiceGateway
 from . import tool
 
-
 logger = logging.getLogger(__name__)
 
-RDS_CUSTOM_GROUP_NAME = 'rds_custom'
-
-@tool(group=RDS_CUSTOM_GROUP_NAME)
-async def describe_rc_instances(region_id: str, instance_id: str|None = None) -> Dict[str, Any]:
-    """
-    describe rds custom instances.
-
-    Args:
-        region_id: The region ID of the RDS Custom instances.
-        instance_id: The ID of a specific instance. If omitted, all instances in the region are returned.
-
-    Returns:
-        dict[str, Any]: The response containing instance metadata.
-    """
-    request = RdsApiModels.DescribeRCInstancesRequest(
-        region_id=region_id,
-        instance_id=instance_id
-    )
-    rds_client = AliyunServiceGateway(region_id).rds()
-    return rds_client.describe_rcinstances_with_options(request)
-
-@tool(group=RDS_CUSTOM_GROUP_NAME)
-async def describe_rc_instance_attribute(region_id: str,instance_id: str) -> Dict[str, Any]:
-    """
-    describe a single rds custom instance's details.
-
-    Args:
-        region_id: The region ID of the RDS Custom instance.
-        instance_id: The ID of the RDS Custom instance.
-
-    Returns:
-        dict[str, Any]: The response containing the instance details.
-    """
-    request = RdsApiModels.DescribeRCInstanceAttributeRequest(
-        region_id=region_id,
-        instance_id=instance_id
-    )
-    return AliyunServiceGateway(region_id).rds().describe_rcinstance_attribute_with_options(request)
+RDS_CUSTOM_GROUP_NAME = 'rds_custom_action'
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
 async def resize_rc_instance_disk(
@@ -108,30 +52,6 @@ async def resize_rc_instance_disk(
         type='online'
     )
     return AliyunServiceGateway(region_id).rds().resize_rcinstance_disk_with_options(request)
-
-@tool(group=RDS_CUSTOM_GROUP_NAME)
-async def describe_rc_instance_vnc_url(
-    region_id: str,
-    instance_id: str,
-    db_type: str
-) -> Dict[str, Any]:
-    """
-    describe the vnc login url for a specific rds custom instance.
-
-    Args:
-        region_id: The region ID of the RDS Custom instance.
-        instance_id: The ID of the instance.
-        db_type: The database type, e.g., 'mysql' or 'mssql'.
-
-    Returns:
-        dict[str, Any]: The response containing the VNC login URL.
-    """
-    request = RdsApiModels.DescribeRCInstanceVncUrlRequest(
-        region_id=region_id,
-        instance_id=instance_id,
-        db_type=db_type
-    )
-    return AliyunServiceGateway(region_id).rds().describe_rcinstance_vnc_url_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
 async def modify_rc_instance_attribute(
@@ -170,6 +90,84 @@ async def modify_rc_instance_attribute(
     return AliyunServiceGateway(region_id).rds().modify_rcinstance_attribute_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
+async def stop_rc_instances(
+    region_id: str,
+    instance_ids: List[str],
+    force_stop: bool = False,
+    batch_optimization: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    stop one or more rds custom instances in batch.
+
+    Args:
+        region_id: The region ID of the RDS Custom instances.
+        instance_ids: A list of instance IDs to be stopped.
+        force_stop: Specifies whether to force stop the instances. Default is false.
+        batch_optimization: The batch operation mode.
+
+    Returns:
+        dict[str, Any]: The response containing the result of the operation.
+    """
+    request = RdsApiModels.StopRCInstancesRequest(
+        region_id=region_id,
+        instance_ids=instance_ids,
+        force_stop=force_stop,
+        batch_optimization=batch_optimization
+    )
+    return AliyunServiceGateway(region_id).rds().stop_rcinstances_with_options(request)
+
+@tool(group=RDS_CUSTOM_GROUP_NAME)
+async def start_rc_instances(
+    region_id: str,
+    instance_ids: List[str],
+    batch_optimization: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    start one or more rds custom instances in batch.
+
+    Args:
+        region_id: The region ID of the RDS Custom instances.
+        instance_ids: A list of instance IDs to be started.
+        batch_optimization: The batch operation mode.
+
+    Returns:
+        dict[str, Any]: The response containing the result of the operation.
+    """
+    request = RdsApiModels.StartRCInstancesRequest(
+        region_id=region_id,
+        instance_ids=instance_ids,
+        batch_optimization=batch_optimization
+    )
+    return AliyunServiceGateway(region_id).rds().start_rcinstances_with_options(request)
+
+@tool(group=RDS_CUSTOM_GROUP_NAME)
+async def reboot_rc_instance(
+    region_id: str,
+    instance_id: str,
+    force_stop: bool = False,
+    dry_run: bool = False
+) -> Dict[str, Any]:
+    """
+    reboot a specific rds custom instance.
+
+    Args:
+        region_id: The region ID of the RDS Custom instance.
+        instance_id: The ID of the instance to reboot.
+        force_stop: Specifies whether to force shutdown before rebooting. Default is false.
+        dry_run: Specifies whether to perform a dry run only. Default is false.
+
+    Returns:
+        dict[str, Any]: The response containing the result of the operation.
+    """
+    request = RdsApiModels.RebootRCInstanceRequest(
+        region_id=region_id,
+        instance_id=instance_id,
+        force_stop=force_stop,
+        dry_run=dry_run
+    )
+    return AliyunServiceGateway(region_id).rds().reboot_rcinstance_with_options(request)
+
+@tool(group=RDS_CUSTOM_GROUP_NAME)
 async def modify_rc_instance_description(
     region_id: str,
     instance_id: str,
@@ -194,37 +192,57 @@ async def modify_rc_instance_description(
     )
     return AliyunServiceGateway(region_id).rds().modify_rcinstance_description_with_options(request)
 
+
+
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-async def describe_rc_snapshots(
+async def sync_rc_security_group(
     region_id: str,
-    disk_id: Optional[str] = None,
-    snapshot_ids: Optional[List[str]] = None,
-    page_number: Optional[int] = None,
-    page_size: Optional[int] = None
+    instance_id: str,
+    security_group_id: str
 ) -> Dict[str, Any]:
     """
-    Query the list of RDS Custom snapshots information.
+    synchronize the security group rules for an rds sql server custom instance.
 
     Args:
-        region_id: The region ID. You can call DescribeRegions to obtain the latest region list.
-        disk_id: The specified cloud disk ID.
-        snapshot_ids: The list of snapshot IDs.
-        page_number: The page number to return.
-        page_size: The number of entries to return on each page. Value range: 30~100. Default value: 30.
+        region_id: The region ID of the RDS Custom instance.
+        instance_id: The ID of the RDS Custom instance.
+        security_group_id: The ID of the security group.
 
     Returns:
-        dict[str, Any]: The response containing the list of snapshots and pagination information.
+        dict[str, Any]: The response containing the result of the operation.
     """
-
-    request = RdsApiModels.DescribeRCSnapshotsRequest(
+    request = RdsApiModels.SyncRCSecurityGroupRequest(
         region_id=region_id,
-        disk_id=disk_id,
-        snapshot_ids=snapshot_ids,
-        page_number=page_number,
-        page_size=page_size
+        instance_id=instance_id,
+        security_group_id=security_group_id
     )
 
-    return AliyunServiceGateway(region_id).rds().describe_rcsnapshots_with_options(request)
+    return AliyunServiceGateway(region_id).rds().sync_rcsecurity_group_with_options(request)
+
+@tool(group=RDS_CUSTOM_GROUP_NAME)
+async def associate_eip_address_with_rc_instance(
+    region_id: str,
+    instance_id: str,
+    allocation_id: str
+) -> Dict[str, Any]:
+    """
+    associate an elastic ip address (eip) with an rds custom instance.
+
+    Args:
+        region_id: The region ID of the RDS Custom instance.
+        instance_id: The ID of the RDS Custom instance.
+        allocation_id: The ID of the Elastic IP Address.
+
+    Returns:
+        dict[str, Any]: The response containing the result of the operation.
+    """
+    request = RdsApiModels.AssociateEipAddressWithRCInstanceRequest(
+        region_id=region_id,
+        instance_id=instance_id,
+        allocation_id=allocation_id
+    )
+
+    return AliyunServiceGateway(region_id).rds().associate_eip_address_with_rcinstance_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
 async def create_rc_snapshot(
@@ -253,40 +271,6 @@ async def create_rc_snapshot(
     )
 
     return AliyunServiceGateway(region_id).rds().create_rcsnapshot_with_options(request)
-
-@tool(group=RDS_CUSTOM_GROUP_NAME)
-async def describe_rc_disks(
-    region_id: str,
-    instance_id: Optional[str] = None,
-    disk_ids: Optional[List[str]] = None,
-    page_number: Optional[int] = None,
-    page_size: Optional[int] = None,
-    tag: Optional[List[Dict[str, str]]] = None
-) -> Dict[str, Any]:
-    """
-    Query the list of disks for an RDS Custom instance.
-
-    Args:
-        region_id: The region ID. You can call DescribeRegions to obtain the latest region list.
-        instance_id: The ID of the instance to which the disks belong.
-        disk_ids: The list of disk IDs to query. Supports up to 100 IDs.
-        page_number: The page number to return.
-        page_size: The number of entries to return on each page. Value range: 30 to 100. Default value: 30.
-        tag: A list of tags to filter results. For example: [{"Key": "your_key", "Value": "your_value"}].
-
-    Returns:
-        dict[str, Any]: A dictionary containing the list of disks and pagination information.
-    """
-    request = RdsApiModels.DescribeRCDisksRequest(
-        region_id=region_id,
-        instance_id=instance_id,
-        disk_ids=disk_ids,
-        page_number=page_number,
-        page_size=page_size,
-        tag=tag
-    )
-    return AliyunServiceGateway(region_id).rds().describe_rcdisks_with_options(request)
-
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
 async def run_rc_instances(
@@ -406,7 +390,6 @@ async def run_rc_instances(
         user_data=user_data,
         user_data_in_base_64=user_data_in_base_64,
         deletion_protection=deletion_protection,
-        # 传入转换后的模型对象
         system_disk=system_disk_obj,
         data_disk=data_disk_objs,
         tag=tag_objs
@@ -414,19 +397,26 @@ async def run_rc_instances(
     return AliyunServiceGateway(region_id).rds().run_rcinstances_with_options(request)
 
 @tool(group=RDS_CUSTOM_GROUP_NAME)
-async def get_current_time() -> Dict[str, Any]:
-    """Get the current time.
+async def unassociate_eip_address_with_rc_instance(
+    region_id: str,
+    instance_id: str,
+    allocation_id: str
+) -> Dict[str, Any]:
+    """
+    unassociate an elastic ip address (eip) from an rds custom instance.
+
+    Args:
+        region_id: The region ID of the RDS Custom instance.
+        instance_id: The ID of the RDS Custom instance.
+        allocation_id: The ID of the Elastic IP Address to unassociate.
 
     Returns:
-        Dict[str, Any]: The response containing the current time.
+        dict[str, Any]: The response containing the result of the operation.
     """
-    import datetime
-    try:
-        current_time = datetime.datetime.now()
-        formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-        return {
-            "current_time": formatted_time
-        }
-    except Exception as e:
-        logger.error(f"Error occurred while getting the current time: {str(e)}")
-        raise Exception(f"Failed to get the current time: {str(e)}")
+    request = RdsApiModels.UnassociateEipAddressWithRCInstanceRequest(
+        region_id=region_id,
+        instance_id=instance_id,
+        allocation_id=allocation_id
+    )
+
+    return AliyunServiceGateway(region_id).rds().unassociate_eip_address_with_rcinstance_with_options(request)
