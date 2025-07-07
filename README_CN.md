@@ -54,6 +54,7 @@ export SERVER_TRANSPORT=sse;
 export ALIBABA_CLOUD_ACCESS_KEY_ID=$your_access_id;  # 替换为你的access_id
 export ALIBABA_CLOUD_ACCESS_KEY_SECRET=$your_access_key;  # 替换为你的access_key
 export ALIBABA_CLOUD_SECURITY_TOKEN=$your_sts_security_token; # 可选项，使用sts token鉴权时填写
+export API_KEY=$you_mcp_server_api_key; # 可选，配置后支持API Key鉴权.
 
 # 启动MCP服务
 uvx alibabacloud-rds-openapi-mcp-server@latest

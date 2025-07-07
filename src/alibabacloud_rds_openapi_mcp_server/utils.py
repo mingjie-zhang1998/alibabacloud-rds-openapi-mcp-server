@@ -1,5 +1,6 @@
 import csv
 import os
+from contextvars import ContextVar
 from datetime import datetime, timezone
 from io import StringIO
 import time
@@ -10,6 +11,7 @@ from alibabacloud_tea_openapi.models import Config
 from alibabacloud_vpc20160428.client import Client as VpcClient
 from alibabacloud_das20200116.client import Client as DAS20200116Client
 
+current_request_headers: ContextVar[dict] = ContextVar("current_request_headers", default={})
 
 PERF_KEYS = {
     "mysql": {
@@ -122,10 +124,15 @@ def convert_datetime_to_timestamp(date_str):
 
 
 def get_rds_client(region_id: str):
+    header = current_request_headers.get()
+    if header:
+        ak, sk, sts = header.get("ak"), header.get("sk"), header.get("sts")
+    else:
+        ak, sk, sts = os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'), os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'), os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN')
     config = Config(
-        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
-        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
-        security_token=os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN'),
+        access_key_id=ak,
+        access_key_secret=sk,
+        security_token=sts,
         region_id=region_id,
         protocol="https",
         connect_timeout=10 * 1000,
@@ -144,10 +151,16 @@ def get_vpc_client(region_id: str) -> VpcClient:
     Returns:
         VpcClient: The VPC client instance for the specified region.
     """
+    header = current_request_headers.get()
+    if header:
+        ak, sk, sts = header.get("ak"), header.get("sk"), header.get("sts")
+    else:
+        ak, sk, sts = os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'), os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'), os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN')
+
     config = Config(
-        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
-        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
-        security_token=os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN'),
+        access_key_id=ak,
+        access_key_secret=sk,
+        security_token=sts,
         region_id=region_id,
         protocol="https",
         connect_timeout=10 * 1000,
@@ -157,10 +170,16 @@ def get_vpc_client(region_id: str) -> VpcClient:
 
 
 def get_bill_client(region_id: str):
+    header = current_request_headers.get()
+    if header:
+        ak, sk, sts = header.get("ak"), header.get("sk"), header.get("sts")
+    else:
+        ak, sk, sts = os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'), os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'), os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN')
+
     config = Config(
-        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
-        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
-        security_token=os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN'),
+        access_key_id=ak,
+        access_key_secret=sk,
+        security_token=sts,
         region_id=region_id,
         protocol="https",
         connect_timeout=10 * 1000,
@@ -171,10 +190,16 @@ def get_bill_client(region_id: str):
 
 
 def get_das_client():
+    header = current_request_headers.get()
+    if header:
+        ak, sk, sts = header.get("ak"), header.get("sk"), header.get("sts")
+    else:
+        ak, sk, sts = os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'), os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'), os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN')
+
     config = Config(
-        access_key_id=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'),
-        access_key_secret=os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
-        security_token=os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN'),
+        access_key_id=ak,
+        access_key_secret=sk,
+        security_token=sts,
         region_id='cn-shanghai',
         protocol="https",
         connect_timeout=10 * 1000,
