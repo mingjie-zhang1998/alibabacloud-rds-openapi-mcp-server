@@ -6,6 +6,7 @@ import sys
 
 import anyio
 import uvicorn
+from mcp.types import ToolAnnotations
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
@@ -39,6 +40,7 @@ from utils import (transform_to_iso_8601,
                    get_vpc_client,
                    get_bill_client, get_das_client, convert_datetime_to_timestamp, current_request_headers)
 from alibabacloud_rds_openapi_mcp_server.core.mcp import RdsMCP
+
 DEFAULT_TOOL_GROUP = 'rds'
 
 logger = logging.getLogger(__name__)
@@ -49,12 +51,16 @@ try:
 except Exception as e:
     print(f"ERROR: Failed to import component packages: {e}")
 
+
 class OpenAPIError(Exception):
     """Custom exception for RDS OpenAPI related errors."""
     pass
 
 
-@mcp.tool()
+READ_ONLY_TOOL = ToolAnnotations(readOnlyHint=True)
+
+
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_db_instances(region_id: str):
     """
     Queries instances.
@@ -69,7 +75,7 @@ async def describe_db_instances(region_id: str):
             page_size=100
         )
         response = client.describe_dbinstances(request)
-        
+
         res = json_array_to_csv(response.body.items.dbinstance)
         if not res:
             return "No RDS instances found."
@@ -78,7 +84,7 @@ async def describe_db_instances(region_id: str):
         raise e
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_db_instance_attribute(region_id: str, db_instance_id: str):
     """
     Queries the details of an instance.
@@ -96,7 +102,7 @@ async def describe_db_instance_attribute(region_id: str, db_instance_id: str):
         raise e
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_db_instance_performance(region_id: str,
                                            db_instance_id: str,
                                            db_type: str,
@@ -316,7 +322,7 @@ async def modify_db_instance_spec(
         raise OpenAPIError(f"Failed to modify RDS instance specifications: {str(e)}")
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_available_classes(
         region_id: str,
         zone_id: str,
@@ -501,7 +507,7 @@ async def create_db_instance(
         raise e
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_available_zones(
         region_id: str,
         engine: str,
@@ -584,7 +590,7 @@ async def describe_available_zones(
         raise OpenAPIError(f"Failed to query available zones: {str(e)}")
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_vpcs(
         region_id: str,
         vpc_id: str = None,
@@ -642,7 +648,7 @@ async def describe_vpcs(
         raise OpenAPIError(f"Failed to query VPCs: {str(e)}")
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_vswitches(
         region_id: str = None,
         vpc_id: str = None,
@@ -705,7 +711,7 @@ async def describe_vswitches(
         raise OpenAPIError(f"Failed to query VSwitches: {str(e)}")
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_slow_log_records(
         region_id: str,
         dbinstance_id: str,
@@ -768,7 +774,7 @@ async def describe_slow_log_records(
         raise OpenAPIError(f"Failed to query slow log records: {str(e)}")
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_error_logs(
         region_id: str,
         db_instance_id: str,
@@ -812,7 +818,7 @@ async def describe_error_logs(
         raise OpenAPIError(f"Failed to describe error logs: {str(e)}")
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_db_instance_net_info(
         region_id: str,
         db_instance_ids: list[str]
@@ -839,7 +845,7 @@ async def describe_db_instance_net_info(
         raise e
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_db_instance_ip_allowlist(
         region_id: str,
         db_instance_ids: list[str]
@@ -866,7 +872,7 @@ async def describe_db_instance_ip_allowlist(
         raise e
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_db_instance_databases(
         region_id: str,
         db_instance_ids: list[str]
@@ -893,7 +899,7 @@ async def describe_db_instance_databases(
         raise e
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_db_instance_accounts(
         region_id: str,
         db_instance_ids: list[str]
@@ -956,7 +962,7 @@ async def create_db_instance_account(
         raise e
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_db_instance_parameters(
         region_id: str,
         db_instance_ids: list[str],
@@ -999,7 +1005,7 @@ async def describe_db_instance_parameters(
         raise e
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_bills(
         billing_cycles: list[str],
         db_instance_id: str = None,
@@ -1124,7 +1130,7 @@ async def allocate_instance_public_connection(
         raise e
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_all_whitelist_template(
         region_id: str,
         template_name: str = None
@@ -1158,7 +1164,7 @@ async def describe_all_whitelist_template(
         raise e
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_instance_linked_whitelist_template(
         region_id: str,
         db_instance_id: str
@@ -1239,7 +1245,7 @@ async def add_tags_to_db_instance(
         raise e
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def get_current_time() -> Dict[str, Any]:
     """Get the current time.
 
@@ -1377,7 +1383,7 @@ async def restart_db_instance(
         raise OpenAPIError(f"Failed to restart RDS instance: {str(e)}")
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_sql_insight_statistic(
         dbinstance_id: str,
         start_time: str,
@@ -1392,9 +1398,10 @@ async def describe_sql_insight_statistic(
     Returns:
         the sql insight statistic information in csv format.
     """
+
     def _descirbe(order_by: str):
         try:
-        # Initialize client
+            # Initialize client
             client = get_das_client()
             page_no = 1
             page_size = 50
@@ -1447,6 +1454,7 @@ async def describe_sql_insight_statistic(
         except Exception as e:
             logger.error(f"Error occurred: {str(e)}")
             raise e
+
     rt_rate = _descirbe("rtRate")
     count_rate = _descirbe("countRate")
     return {
@@ -1455,7 +1463,7 @@ async def describe_sql_insight_statistic(
     }
 
 
-@mcp.tool()
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def show_engine_innodb_status(
         dbinstance_id: str,
         region_id: str
@@ -1475,7 +1483,8 @@ async def show_engine_innodb_status(
         logger.error(f"Error occurred: {str(e)}")
         raise e
 
-@mcp.tool()
+
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def show_create_table(
         region_id: str,
         dbinstance_id: str,
