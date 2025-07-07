@@ -1,8 +1,15 @@
+import argparse
 import json
 import logging
 import os
 import sys
-import argparse
+
+import anyio
+import uvicorn
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 import time
@@ -30,7 +37,7 @@ from utils import (transform_to_iso_8601,
                    json_array_to_csv,
                    get_rds_client,
                    get_vpc_client,
-                   get_bill_client, get_das_client, convert_datetime_to_timestamp)
+                   get_bill_client, get_das_client, convert_datetime_to_timestamp, current_request_headers)
 from alibabacloud_rds_openapi_mcp_server.core.mcp import RdsMCP
 DEFAULT_TOOL_GROUP = 'rds'
 
@@ -1492,7 +1499,26 @@ async def show_create_table(
         logger.error(f"Error occurred: {str(e)}")
         raise e
 
-        
+
+class VerifyHeaderMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        api_key = os.getenv('API_KEY')
+        if api_key:
+            authorization = request.headers.get("authorization")
+            if not authorization:
+                return Response("Unauthorized", status_code=401)
+            request_key = authorization.split(" ")[-1]
+            if request_key != api_key:
+                return Response("Unauthorized", status_code=401)
+
+        token = current_request_headers.set(dict(request.headers))
+        try:
+            response = await call_next(request)
+        finally:
+            current_request_headers.reset(token)
+        return response
+
+
 def main(toolsets: Optional[str] = None) -> None:
     """
     Initializes, activates, and runs the MCP server engine.
@@ -1518,7 +1544,19 @@ def main(toolsets: Optional[str] = None) -> None:
     mcp.activate(enabled_groups=enabled_groups)
 
     transport = os.getenv("SERVER_TRANSPORT", "stdio")
-    mcp.run(transport=transport)
+    if transport in ("sse", "streamable_http"):
+        app = mcp.sse_app() if transport == "sse" else mcp.streamable_http_app()
+        app.add_middleware(VerifyHeaderMiddleware)
+        config = uvicorn.Config(
+            app,
+            host="0.0.0.0",
+            port=8000,
+            log_level="info",
+        )
+        server = uvicorn.Server(config)
+        anyio.run(server.serve)
+    else:
+        mcp.run(transport=transport)
 
 
 def _parse_groups_from_source(source: str | None) -> List[str]:
@@ -1536,6 +1574,7 @@ def _parse_groups_from_source(source: str | None) -> List[str]:
                 expanded_groups.append(g_to_add)
     return expanded_groups or [DEFAULT_TOOL_GROUP]
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1544,4 +1583,3 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     main(toolsets=args.toolsets)
-

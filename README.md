@@ -54,6 +54,7 @@ export SERVER_TRANSPORT=sse;
 export ALIBABA_CLOUD_ACCESS_KEY_ID=$you_access_id;
 export ALIBABA_CLOUD_ACCESS_KEY_SECRET=$you_access_key;
 export ALIBABA_CLOUD_SECURITY_TOKEN=$you_sts_security_token; # optional, required when using STS Token 
+export API_KEY=$you_mcp_server_api_key; # Optional, after configuration, requests will undergo API Key authentication.
 
 # run mcp server
 uvx alibabacloud-rds-openapi-mcp-server@latest
