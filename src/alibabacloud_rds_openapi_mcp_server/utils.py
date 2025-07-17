@@ -123,12 +123,18 @@ def convert_datetime_to_timestamp(date_str):
     return timestamp_milliseconds
 
 
-def get_rds_client(region_id: str):
+def get_aksk():
+    ak = os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID')
+    sk = os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET')
+    sts = os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN')
     header = current_request_headers.get()
-    if header:
+    if header and (header.get("ak") or header.get("sk") or header.get("sts")):
         ak, sk, sts = header.get("ak"), header.get("sk"), header.get("sts")
-    else:
-        ak, sk, sts = os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'), os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'), os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN')
+    return ak, sk, sts
+
+
+def get_rds_client(region_id: str):
+    ak, sk, sts = get_aksk()
     config = Config(
         access_key_id=ak,
         access_key_secret=sk,
@@ -151,12 +157,7 @@ def get_vpc_client(region_id: str) -> VpcClient:
     Returns:
         VpcClient: The VPC client instance for the specified region.
     """
-    header = current_request_headers.get()
-    if header:
-        ak, sk, sts = header.get("ak"), header.get("sk"), header.get("sts")
-    else:
-        ak, sk, sts = os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'), os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'), os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN')
-
+    ak, sk, sts = get_aksk()
     config = Config(
         access_key_id=ak,
         access_key_secret=sk,
@@ -170,12 +171,7 @@ def get_vpc_client(region_id: str) -> VpcClient:
 
 
 def get_bill_client(region_id: str):
-    header = current_request_headers.get()
-    if header:
-        ak, sk, sts = header.get("ak"), header.get("sk"), header.get("sts")
-    else:
-        ak, sk, sts = os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'), os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'), os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN')
-
+    ak, sk, sts = get_aksk()
     config = Config(
         access_key_id=ak,
         access_key_secret=sk,
@@ -190,12 +186,7 @@ def get_bill_client(region_id: str):
 
 
 def get_das_client():
-    header = current_request_headers.get()
-    if header:
-        ak, sk, sts = header.get("ak"), header.get("sk"), header.get("sts")
-    else:
-        ak, sk, sts = os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID'), os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET'), os.getenv('ALIBABA_CLOUD_SECURITY_TOKEN')
-
+    ak, sk, sts = get_aksk()
     config = Config(
         access_key_id=ak,
         access_key_secret=sk,
