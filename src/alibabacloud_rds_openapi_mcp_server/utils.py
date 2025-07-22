@@ -3,6 +3,7 @@ import os
 from contextvars import ContextVar
 from datetime import datetime, timezone
 from io import StringIO
+import tzlocal
 import time
 
 from alibabacloud_bssopenapi20171214.client import Client as BssOpenApi20171214Client
@@ -50,6 +51,15 @@ PERF_KEYS = {
 
 }
 
+DAS_KEYS = {
+    "mysql": {
+        "DiskUsage": ["disk_usage"],
+        "IOPSUsage": ["data_iops_usage"],
+        "IOBytesPS": ["data_io_bytes_ps"],
+        "MdlLockSession": ["mdl_lock_session"]
+    }
+}
+
 
 def parse_args(argv):
     args = {}
@@ -70,6 +80,23 @@ def parse_args(argv):
 def transform_to_iso_8601(dt: datetime, timespec: str):
     return dt.astimezone(timezone.utc).isoformat(timespec=timespec).replace("+00:00", "Z")
 
+def parse_iso_8601(s: str) -> datetime:
+    """
+    将 ISO 8601 格式字符串（支持 Z 时区标记）转换为 datetime 对象。
+    """
+    # 替换 'Z' 为 '+00:00'，以便正确解析为 UTC 时间
+    s = s.replace("Z", "+00:00")
+    # 解析字符串为 UTC 时间的 datetime 对象
+    dt_utc = datetime.fromisoformat(s)
+    # 获取本地时区
+    local_tz = tzlocal.get_localzone()
+    # 转换为本地时区时间
+    dt_local = dt_utc.astimezone(local_tz)
+    return dt_local.replace(tzinfo=None)
+
+def transform_timestamp_to_datetime(timestamp: int):
+    dt = datetime.fromtimestamp(timestamp / 1000)
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
 
 def transform_to_datetime(s: str):
     try:
@@ -87,6 +114,13 @@ def transform_perf_key(db_type: str, perf_keys: list[str]):
         else:
             perf_key_after_transform.append(key)
     return perf_key_after_transform
+
+def transform_das_key(db_type: str, das_keys: list[str]):
+    das_key_after_transform = []
+    for key in das_keys:
+        if key in DAS_KEYS[db_type.lower()]:
+            das_key_after_transform.extend(DAS_KEYS[db_type.lower()][key])
+    return das_key_after_transform
 
 
 def json_array_to_csv(data):
