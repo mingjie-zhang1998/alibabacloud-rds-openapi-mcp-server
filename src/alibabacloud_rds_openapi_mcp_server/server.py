@@ -1611,6 +1611,31 @@ async def explain_sql(
         raise e
 
 
+@mcp.tool(annotations=READ_ONLY_TOOL)
+async def query_sql(
+        region_id: str,
+        dbinstance_id: str,
+        db_name: str,
+        sql: str
+) -> str:
+    """
+    execute read-only sql likes show xxx, select xxx
+    Args:
+        dbinstance_id (str): The ID of the RDS instance.
+        region_id(str): the region id of instance.
+        db_name(str): the db name for execute sql.
+        sql(str): the sql to be executed.
+    Returns:
+        the sql result.
+    """
+    try:
+        with DBService(region_id, dbinstance_id, db_name) as service:
+            return service.execute_sql(sql=sql)
+    except Exception as e:
+        logger.error(f"Error occurred: {str(e)}")
+        raise e
+
+
 class VerifyHeaderMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         api_key = os.getenv('API_KEY')
