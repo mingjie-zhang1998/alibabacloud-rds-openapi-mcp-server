@@ -210,4 +210,7 @@ class DBConn:
             result = [dict(zip(columns, row)) for row in rows]
         else:
             result = []
-        return json.dumps(result, ensure_ascii=False)
+        try:
+            return json.dumps(result, ensure_ascii=False)
+        except Exception as e:
+            return str(result)
