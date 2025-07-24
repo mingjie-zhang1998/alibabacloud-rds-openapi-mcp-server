@@ -34,7 +34,10 @@ if src_path not in sys.path:
 from db_service import DBService
 from utils import (transform_to_iso_8601,
                    transform_to_datetime,
+                   transform_timestamp_to_datetime,
+                   parse_iso_8601,
                    transform_perf_key,
+                   transform_das_key,
                    json_array_to_csv,
                    get_rds_client,
                    get_vpc_client,
@@ -110,7 +113,9 @@ async def describe_db_instance_performance(region_id: str,
                                            start_time: str,
                                            end_time: str):
     """
-    Queries the performance data of an instance.
+    Queries the performance data of an instance using the RDS OpenAPI.
+    This method provides performance data collected from the RDS service, such as MemCpuUsage, QPSTPS, Sessions, ThreadStatus, MBPS, etc.
+    
     Args:
         region_id: db instance region(e.g. cn-hangzhou)
         db_instance_id: db instance id(e.g. rm-xxx)
@@ -130,10 +135,13 @@ async def describe_db_instance_performance(region_id: str,
                     if _item is None or sum([float(v) for v in performance_value[j].value.split('&')]) > sum(
                             [float(v) for v in _item.value.split('&')]):
                         _item = performance_value[j]
-                else:
-                    result.append(_item)
+                
+                _item.date = parse_iso_8601(_item.date)
+                result.append(_item)
             return result
         else:
+            for item in performance_value:
+                item.date = parse_iso_8601(item.date)
             return performance_value
 
     try:
@@ -1384,6 +1392,80 @@ async def restart_db_instance(
 
 
 @mcp.tool(annotations=READ_ONLY_TOOL)
+async def describe_monitor_metrics(
+        dbinstance_id: str,
+        metrics_list: list[str],
+        db_type: str,
+        start_time: str,
+        end_time: str,
+):
+    """
+    Queries performance and diagnostic metrics for an instance using the DAS (Database Autonomy Service) API.
+    This method provides extra monitoring and diagnostic data which cannot be queried by describe_db_instance_performance, such as IOPSUsage, MdlLockSession, etc.
+    
+    Args:
+        dbinstance_id (str): The ID of the RDS instance.
+        metrics_list (list[str]): The metrics to query. (e.g. ["IOBytesPS", "IOPSUsage", "MdlLockSession", "DiskUsage"])
+        db_type (str): The type of the database. (e.g. "mysql")
+        start_time(str): the start time. e.g. 2025-06-06 20:00:00
+        end_time(str): the end time. e.g. 2025-06-06 20:10:00
+    Returns:
+        the monitor metrics information.
+    """
+
+    try:
+        # Initialize client
+        client = get_das_client()
+        metrics = transform_das_key(db_type, metrics_list)
+        if not metrics:
+            raise OpenAPIError(f"Unsupported das_metric_key: {metrics_list}")
+        start_time = convert_datetime_to_timestamp(start_time)
+        end_time = convert_datetime_to_timestamp(end_time)
+
+        # 通过 interval 控制查询粒度
+        interval = int(max((end_time - start_time) / 30000, 5))
+        body = {
+            "InstanceId": dbinstance_id,
+            "Metrics": ",".join(metrics),
+            "StartTime": start_time,
+            "EndTime": end_time,
+            "Interval": interval
+        }
+        req = open_api_models.OpenApiRequest(
+            query=OpenApiUtilClient.query({}),
+            body=OpenApiUtilClient.parse_to_map(body)
+        )
+        params = open_api_models.Params(
+            action='GetPerformanceMetrics',
+            version='2020-01-16',
+            protocol='HTTPS',
+            pathname='/',
+            method='POST',
+            auth_type='AK',
+            style='RPC',
+            req_body_type='formData',
+            body_type='json'
+        )
+        response = client.call_api(params, req, util_models.RuntimeOptions())
+        response_data = response['body']['Data']
+        timestamp_map = {}
+        for metric in response_data:
+            name = metric["Name"]
+            values = metric["Value"]
+            timestamps = metric["Timestamp"]
+            for timestamp, value in zip(timestamps, values):
+                dt = transform_timestamp_to_datetime(timestamp)
+                if dt not in timestamp_map:
+                    timestamp_map[dt] = {}
+                timestamp_map[dt][name] = value
+        
+        timestamp_list = [{"datetime": dt, **values} for dt, values in timestamp_map.items()]
+        return json_array_to_csv(timestamp_list)
+    except Exception as e:
+        logger.error(f"Error occurred: {str(e)}")
+        raise e
+
+@mcp.tool(annotations=READ_ONLY_TOOL)
 async def describe_sql_insight_statistic(
         dbinstance_id: str,
         start_time: str,
@@ -1504,6 +1586,30 @@ async def show_create_table(
     try:
         with DBService(region_id, dbinstance_id, db_name) as service:
             return service.execute_sql(f"show create table {db_name}.{table_name}")
+    except Exception as e:
+        logger.error(f"Error occurred: {str(e)}")
+        raise e
+
+@mcp.tool(annotations=READ_ONLY_TOOL)
+async def explain_sql(
+        region_id: str,
+        dbinstance_id: str,
+        db_name: str,
+        sql: str
+) -> str:
+    """
+    show sql execute plan
+    Args:
+        dbinstance_id (str): The ID of the RDS instance.
+        region_id(str): the region id of instance.
+        db_name(str): the db name for table.
+        sql(str): the target sql.
+    Returns:
+        the sql execute plan.
+    """
+    try:
+        with DBService(region_id, dbinstance_id, db_name) as service:
+            return service.execute_sql(f"explain {sql}")
     except Exception as e:
         logger.error(f"Error occurred: {str(e)}")
         raise e
