@@ -175,13 +175,6 @@ export MCP_TOOLSETS=rds,rds_mssql_custom
 #### 默认行为
 如果未指定工具集，将自动加载默认的 `rds` 工具组。
 
-### SQL 工具集
-> MCP Server会自动创建一个只读账号，执行SQL后再自动删除。需要MCP Server能够连通到实例。
-
-* `show_engine_innodb_status`: Execute sql `show engine innodb status` and return sql result.
-* `show_create_table`: Execute sql `show create table` and return sql result.
-* `query_sql`: Execute read-only sql and return sql result.
-
 ### 资源
 当前暂无资源
 
