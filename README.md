@@ -122,6 +122,7 @@ Add the following configuration to the MCP client configuration file:
 * `describe_db_instances`: Queries instances.
 * `describe_error_logs`: Queries the error log of an instance.
 * `describe_instance_linked_whitelist_template`: Query the whitelist template list.
+* `describe_monitor_metrics`: Queries performance and diagnostic metrics for an instance using the DAS (Database Autonomy Service) API.
 * `describe_slow_log_records`: Query slow log records for an RDS instance.
 * `describe_sql_insight_statistic`: Query SQL Log statistics, including SQL cost time, execution times, and account.
 * `describe_vpcs`: Query VPC list.
@@ -135,6 +136,7 @@ Add the following configuration to the MCP client configuration file:
 ### SQL Tools
 > The MCP Server will automatically create a read-only account, execute the SQL statement, and then automatically delete the account. This process requires that the MCP Server can connect to the instance.
 
+* `explain_sql`: Execute sql `explain` and return sql result.
 * `show_engine_innodb_status`: Execute sql `show engine innodb status` and return sql result.
 * `show_create_table`: Execute sql `show create table` and return sql result.
 * `query_sql`: Execute read-only sql and return sql result.

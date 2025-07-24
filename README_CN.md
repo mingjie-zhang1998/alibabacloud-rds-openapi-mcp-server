@@ -119,6 +119,7 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 * `describe_db_instances`: 查询实例
 * `describe_error_logs`: 查询实例错误日志
 * `describe_instance_linked_whitelist_template`: 查询绑定到实例的白名单模板列表
+* `describe_monitor_metrics`: 通过 DAS API 查询RDS实例监控指标
 * `describe_slow_log_records`: 查询RDS实例的慢日志记录
 * `describe_sql_insight_statistic`: 查询实例SQL日志统计，包括SQL耗时、执行次数、账号等
 * `describe_vpcs`: 查询VPC列表
@@ -129,6 +130,13 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 * `modify_db_instance_spec`: 修改RDS实例规格
 * `modify_parameter`: 修改RDS实例参数
 * `restart_db_instance`: 重启RDS实例
+### SQL 工具
+> MCP 服务器将自动创建一个只读账户，执行 SQL 语句，然后自动删除该账户。此过程要求 MCP 服务器能够连接到数据库实例。
+
+* `explain_sql`：执行 SQL `explain` 命令并返回 SQL 执行计划结果。
+* `show_engine_innodb_status`：执行 SQL `show engine innodb status` 命令并返回 SQL 执行结果。
+* `show_create_table`：执行 SQL `show create table` 命令并返回 SQL 执行结果。
+* `query_sql`：执行只读 SQL 语句并返回 SQL 执行结果。
 
 
 #### 工具集分组

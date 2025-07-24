@@ -113,7 +113,9 @@ async def describe_db_instance_performance(region_id: str,
                                            start_time: str,
                                            end_time: str):
     """
-    Queries the performance data of an instance.
+    Queries the performance data of an instance using the RDS OpenAPI.
+    This method provides performance data collected from the RDS service, such as MemCpuUsage, QPSTPS, Sessions, ThreadStatus, MBPS, etc.
+    
     Args:
         region_id: db instance region(e.g. cn-hangzhou)
         db_instance_id: db instance id(e.g. rm-xxx)
@@ -1398,10 +1400,12 @@ async def describe_monitor_metrics(
         end_time: str,
 ):
     """
-    Query DAS monitor metrics.
+    Queries performance and diagnostic metrics for an instance using the DAS (Database Autonomy Service) API.
+    This method provides extra monitoring and diagnostic data which cannot be queried by describe_db_instance_performance, such as IOPSUsage, MdlLockSession, etc.
+    
     Args:
         dbinstance_id (str): The ID of the RDS instance.
-        metrics (list[str]): The metrics to query. (e.g. ["IOBytesPS", "IOPSUsage", "MdlLockSession", "DiskUsage"])
+        metrics_list (list[str]): The metrics to query. (e.g. ["IOBytesPS", "IOPSUsage", "MdlLockSession", "DiskUsage"])
         db_type (str): The type of the database. (e.g. "mysql")
         start_time(str): the start time. e.g. 2025-06-06 20:00:00
         end_time(str): the end time. e.g. 2025-06-06 20:10:00
