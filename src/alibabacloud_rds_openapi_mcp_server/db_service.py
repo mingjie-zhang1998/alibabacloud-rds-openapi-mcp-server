@@ -6,7 +6,7 @@ import string
 import pymysql
 from alibabacloud_rds20140815 import models as rds_20140815_models
 
-from utils import get_rds_client
+from utils import get_rds_client, get_rds_account
 
 
 def random_str(length=8):
@@ -54,8 +54,7 @@ class DBService:
         self.region_id = region_id
 
         self.__db_type = None
-        self.__account_name = None
-        self.__account_password = None
+        self.__account_name, self.__account_password = get_rds_account()
         self.__host = None
         self.__port = None
         self.__client = get_rds_client(region_id)
@@ -63,9 +62,13 @@ class DBService:
 
     def __enter__(self):
         self._get_db_instance_info()
-        self._create_temp_account()
-        if self.database:
-            self._grant_privilege()
+        if not self.__account_name or not self.__account_password:
+            self._create_temp_account()
+            if self.database:
+                self._grant_privilege()
+        else:
+            self.account_name = self.__account_name
+            self.account_password = self.__account_password
         self.__db_conn = DBConn(self)
         self.__db_conn.connect()
         return self
@@ -73,7 +76,8 @@ class DBService:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.__db_conn is not None:
             self.__db_conn.close()
-        self._delete_account()
+        if not self.__account_name or not self.__account_password:
+            self._delete_account()
         self.__client = None
 
     def _get_db_instance_info(self):

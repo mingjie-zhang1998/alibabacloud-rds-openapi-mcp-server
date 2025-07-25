@@ -157,6 +157,15 @@ def convert_datetime_to_timestamp(date_str):
     return timestamp_milliseconds
 
 
+def get_rds_account():
+    header = current_request_headers.get()
+    user = header.get("rds_user") if header else None
+    passwd = header.get("rds_passwd") if header else None
+    if user and passwd:
+        return user, passwd
+    return None, None
+
+
 def get_aksk():
     ak = os.getenv('ALIBABA_CLOUD_ACCESS_KEY_ID')
     sk = os.getenv('ALIBABA_CLOUD_ACCESS_KEY_SECRET')
