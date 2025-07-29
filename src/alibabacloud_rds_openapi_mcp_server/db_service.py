@@ -61,24 +61,24 @@ class DBService:
         self.__client = get_rds_client(region_id)
         self.__db_conn = None
 
-    def __enter__(self):
-        self._get_db_instance_info()
+    async def __aenter__(self):
+        await asyncio.to_thread(self._get_db_instance_info)
         if not self.__account_name or not self.__account_password:
-            self._create_temp_account()
+            await asyncio.to_thread(self._create_temp_account)
             if self.database:
-                self._grant_privilege()
+                await asyncio.to_thread(self._grant_privilege)
         else:
             self.account_name = self.__account_name
             self.account_password = self.__account_password
         self.__db_conn = DBConn(self)
-        self.__db_conn.connect()
+        await asyncio.to_thread(self.__db_conn.connect)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
         if self.__db_conn is not None:
-            self.__db_conn.close()
+            await asyncio.to_thread(self.__db_conn.close)
         if not self.__account_name or not self.__account_password:
-            self._delete_account()
+            await asyncio.to_thread(self._delete_account)
         self.__client = None
 
     def _get_db_instance_info(self):
