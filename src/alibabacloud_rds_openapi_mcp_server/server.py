@@ -1560,7 +1560,7 @@ async def show_engine_innodb_status(
     """
     try:
         with DBService(region_id, dbinstance_id) as service:
-            return service.execute_sql("show engine innodb status")
+            return await service.execute_sql("show engine innodb status")
     except Exception as e:
         logger.error(f"Error occurred: {str(e)}")
         raise e
@@ -1585,7 +1585,7 @@ async def show_create_table(
     """
     try:
         with DBService(region_id, dbinstance_id, db_name) as service:
-            return service.execute_sql(f"show create table {db_name}.{table_name}")
+            return await service.execute_sql(f"show create table {db_name}.{table_name}")
     except Exception as e:
         logger.error(f"Error occurred: {str(e)}")
         raise e
@@ -1609,7 +1609,7 @@ async def explain_sql(
     """
     try:
         with DBService(region_id, dbinstance_id, db_name) as service:
-            return service.execute_sql(f"explain {sql}")
+            return await service.execute_sql(f"explain {sql}")
     except Exception as e:
         logger.error(f"Error occurred: {str(e)}")
         raise e
@@ -1634,7 +1634,7 @@ async def query_sql(
     """
     try:
         with DBService(region_id, dbinstance_id, db_name) as service:
-            return service.execute_sql(sql=sql)
+            return await service.execute_sql(sql=sql)
     except Exception as e:
         logger.error(f"Error occurred: {str(e)}")
         raise e

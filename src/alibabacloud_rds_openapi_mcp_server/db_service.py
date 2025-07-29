@@ -1,3 +1,4 @@
+import asyncio
 import json
 import random
 import socket
@@ -142,8 +143,8 @@ class DBService:
         )
         self.__client.delete_account(req)
 
-    def execute_sql(self, sql):
-        return self.__db_conn.execute_sql(sql)
+    async def execute_sql(self, sql):
+        return await asyncio.to_thread(self.__db_conn.execute_sql, sql)
 
     @property
     def user(self):
@@ -214,6 +215,7 @@ class DBConn:
             result = [dict(zip(columns, row)) for row in rows]
         else:
             result = []
+        cursor.close()
         try:
             return json.dumps(result, ensure_ascii=False)
         except Exception as e:
