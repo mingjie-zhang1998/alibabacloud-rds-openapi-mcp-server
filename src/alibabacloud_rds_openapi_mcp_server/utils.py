@@ -120,6 +120,8 @@ def transform_das_key(db_type: str, das_keys: list[str]):
     for key in das_keys:
         if key in DAS_KEYS[db_type.lower()]:
             das_key_after_transform.extend(DAS_KEYS[db_type.lower()][key])
+        else:
+            das_key_after_transform.append(key)
     return das_key_after_transform
 
 
@@ -149,6 +151,21 @@ def json_array_to_csv(data):
 
     return output.getvalue()
 
+
+def json_array_to_markdown(headers, datas):
+    if not headers or not isinstance(headers, list):
+        return ""
+    if not datas or not isinstance(datas, list):
+        return ""
+    
+    markdown_table = "| " + " | ".join(headers) + " |\n"
+    markdown_table += "| " + " | ".join(["---"] * len(headers)) + " |\n"
+    for row in datas:
+        if isinstance(row, dict):
+            markdown_table += "| " + " | ".join(str(row.get(header, '-')) for header in headers) + " |\n"
+        else:
+            markdown_table += "| " + " | ".join(map(str, row)) + " |\n"
+    return markdown_table
 
 def convert_datetime_to_timestamp(date_str):
     dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")

@@ -39,6 +39,7 @@ from utils import (transform_to_iso_8601,
                    transform_perf_key,
                    transform_das_key,
                    json_array_to_csv,
+                   json_array_to_markdown,
                    get_rds_client,
                    get_vpc_client,
                    get_bill_client, get_das_client, convert_datetime_to_timestamp, current_request_headers)
@@ -1449,18 +1450,26 @@ async def describe_monitor_metrics(
         response = client.call_api(params, req, util_models.RuntimeOptions())
         response_data = response['body']['Data']
         timestamp_map = {}
+        resp_metrics_list = set()
         for metric in response_data:
             name = metric["Name"]
             values = metric["Value"]
             timestamps = metric["Timestamp"]
+            resp_metrics_list.add(name)
             for timestamp, value in zip(timestamps, values):
                 dt = transform_timestamp_to_datetime(timestamp)
                 if dt not in timestamp_map:
                     timestamp_map[dt] = {}
                 timestamp_map[dt][name] = value
         
-        timestamp_list = [{"datetime": dt, **values} for dt, values in timestamp_map.items()]
-        return json_array_to_csv(timestamp_list)
+        headers = sorted(list(resp_metrics_list))
+        datas = []
+        for dt in sorted(timestamp_map.keys()):
+            value_map = timestamp_map[dt]
+            value_map["datetime"] = dt
+            datas.append(value_map)
+        headers.insert(0, "datetime")
+        return json_array_to_markdown(headers, datas)
     except Exception as e:
         logger.error(f"Error occurred: {str(e)}")
         raise e
