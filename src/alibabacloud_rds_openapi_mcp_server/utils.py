@@ -60,76 +60,6 @@ DAS_KEYS = {
     }
 }
 
-INSTANCE_MAX_IO_MAP = {
-    # 独享型
-    "x2.medium": 125,
-    "x4.medium": 125,
-    "x8.medium": 125,
-    "x2.large": 187.5,
-    "x4.large": 187.5,
-    "x8.large": 187.5,
-    "x2.xlarge": 250,
-    "x4.xlarge": 250,
-    "x8.xlarge": 250,
-    "x2.3large": 312.5,
-    "x4.3large": 312.5,
-    "x8.3large": 312.5,
-    "x2.2xlarge": 375,
-    "x4.2xlarge": 375,
-    "x8.2xlarge": 375,
-    "x2.3xlarge": 500,
-    "x4.3xlarge": 500,
-    "x8.3xlarge": 500,
-    "x2.4xlarge": 625,
-    "x4.4xlarge": 625,
-    "x8.4xlarge": 625,
-    "x2.13large": 1000,
-    "x4.13large": 1000,
-    "x8.13large": 1000,
-    "x2.8xlarge": 1025,
-    "x4.8xlarge": 1025,
-    "x8.8xlarge": 1025,
-    "x2.13xlarge": 2000,
-    "x4.13xlarge": 2000,
-    "x8.13xlarge": 2000,
-    "x4.16xlarge": 2560,
-
-    # 倚天版（ARM架构）规格
-    "x4m.medium": 125,
-    "x8m.medium": 125,
-    "x2m.large": 187.5,
-    "x4m.large": 187.5,
-    "x8m.large": 187.5,
-    "x2m.xlarge": 250,
-    "x4m.xlarge": 250,
-    "x8m.xlarge": 250,
-    "x2m.2xlarge": 375,
-    "x4m.2xlarge": 375,
-    "x8m.2xlarge": 375,
-    "x2m.4xlarge": 512.5,
-    "x4m.4xlarge": 512.5,
-    "x4m.8xlarge": 1025,
-    "x8m.8xlarge": 1000,
-
-    # 倚天集群版（ARM架构）规格
-    "x4e.medium": 125,
-    "x8e.medium": 125,
-    "x2e.large": 187.5,
-    "x4e.large": 187.5,
-    "x8e.large": 187.5,
-    "x2e.xlarge": 250,
-    "x4e.xlarge": 250,
-    "x8e.xlarge": 250,
-    "x2e.2xlarge": 375,
-    "x4e.2xlarge": 375,
-    "x8e.2xlarge": 375,
-    "x2e.4xlarge": 512.5,
-    "x4e.4xlarge": 512.5,
-    "x8e.4xlarge": 512.5,
-    "x2e.8xlarge": 1000,
-    "x4e.8xlarge": 1025,
-    "x8e.8xlarge": 1000
-}
 
 def parse_args(argv):
     args = {}
@@ -194,53 +124,6 @@ def transform_das_key(db_type: str, das_keys: list[str]):
             das_key_after_transform.append(key)
     return das_key_after_transform
 
-def get_instance_max_iombps(instance_attribute):
-    """
-        计算规则参考 https://help.aliyun.com/zh/rds/product-overview/primary-apsaradb-rds-instance-types?spm=a2c4g.11186623.help-menu-26090.d_0_0_6_1.1ca8798519jnKx#af0e23b6e5t6w
-    """
-    instance_class = instance_attribute['DBInstanceClass']
-    # 提取核心规格代码
-    # 例如: mysql.x2.medium.2c -> x2.medium
-    # 例如: mysqlro.x4.large.1c -> x4.large
-    parts = instance_class.split('.')
-
-    # 如果至少有3部分，取中间的部分作为核心规格代码
-    if len(parts) >= 3:
-        stripped_instance_class = '.'.join(parts[1:3])
-    else:
-        stripped_instance_class = instance_class
-
-    storage_type = instance_attribute['DBInstanceStorageType']
-    instance_storage = instance_attribute['DBInstanceStorage']
-    max_iombps = None
-    instance_max_io = INSTANCE_MAX_IO_MAP.get(stripped_instance_class, None)
-    storage_max_io = 120 + 0.5 * instance_storage
-    if storage_type.startswith('cloud'):
-        if instance_max_io is not None:
-            max_iombps = min(instance_max_io, storage_max_io)
-        else:
-            max_iombps = storage_max_io
-        if storage_type == 'cloud_essd':
-            max_iombps = min(350, max_iombps)
-        elif storage_type == 'cloud_essd2':
-            max_iombps = min(750, max_iombps)
-        elif storage_type == 'cloud_essd3':
-            max_iombps = min(4000, max_iombps)
-        else:
-            max_iombps = min(300, max_iombps)
-    elif storage_type == 'general_essd':
-        if instance_attribute["BurstingEnabled"]:
-            if instance_max_io is not None:
-                max_iombps = min(4000, instance_max_io)
-            else:
-                max_iombps = 4000
-        else:
-            if instance_max_io is not None:
-                max_iombps = min(storage_max_io, instance_max_io)
-            else:
-                max_iombps = storage_max_io
-            max_iombps = min(350, max_iombps)
-    return max_iombps
 
 def json_array_to_csv(data):
     if not data or not isinstance(data, list):

@@ -38,7 +38,6 @@ from utils import (transform_to_iso_8601,
                    parse_iso_8601,
                    transform_perf_key,
                    transform_das_key,
-                   get_instance_max_iombps,
                    json_array_to_csv,
                    json_array_to_markdown,
                    get_rds_client,
@@ -102,15 +101,7 @@ async def describe_db_instance_attribute(region_id: str, db_instance_id: str):
     try:
         request = rds_20140815_models.DescribeDBInstanceAttributeRequest(dbinstance_id=db_instance_id)
         response = client.describe_dbinstance_attribute(request)
-
-        result = response.body.to_map()
-        
-        # 计算 MaxIOMBPS
-        instance_attribute = result['Items']['DBInstanceAttribute'][0]
-        max_iombps = get_instance_max_iombps(instance_attribute)
-        if max_iombps is not None:
-            instance_attribute.update({'MaxIOMBPS': max_iombps})
-        return result
+        return response.body.to_map()
     except Exception as e:
         raise e
 
