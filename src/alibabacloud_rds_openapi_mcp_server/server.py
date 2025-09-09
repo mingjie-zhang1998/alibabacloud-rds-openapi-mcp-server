@@ -9,7 +9,7 @@ import uvicorn
 from mcp.types import ToolAnnotations
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import Response
+from starlette.responses import Response, JSONResponse
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
@@ -49,7 +49,7 @@ from alibabacloud_rds_openapi_mcp_server.core.mcp import RdsMCP
 DEFAULT_TOOL_GROUP = 'rds'
 
 logger = logging.getLogger(__name__)
-mcp = RdsMCP("Alibaba Cloud RDS OPENAPI", port=os.getenv("SERVER_PORT", 8000))
+mcp = RdsMCP("Alibaba Cloud RDS OPENAPI", port=os.getenv("SERVER_PORT", 8000), stateless_http=True)
 try:
     import alibabacloud_rds_openapi_mcp_server.tools
     import alibabacloud_rds_openapi_mcp_server.prompts
@@ -1655,6 +1655,46 @@ async def query_sql(
     except Exception as e:
         logger.error(f"Error occurred: {str(e)}")
         raise e
+
+async def health_check(request: Request) -> JSONResponse:
+    """Health check endpoint for container health monitoring and load balancer probes."""
+    try:
+        # Basic health check - check if the server is responsive
+        health_status = {
+            "status": "healthy",
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "service": "Alibaba Cloud RDS MCP Server",
+            "version": "1.0.0",
+            "transport": os.getenv("SERVER_TRANSPORT", "stdio"),
+            "enabled_groups": _parse_groups_from_source(os.getenv("MCP_TOOLSETS")),
+        }
+
+        # Optional: Add more detailed health checks here
+        # For example, check if essential environment variables are set
+        essential_vars = ["ALIBABA_CLOUD_ACCESS_KEY_ID", "ALIBABA_CLOUD_ACCESS_KEY_SECRET"]
+        missing_vars = [var for var in essential_vars if not os.getenv(var)]
+
+        if missing_vars:
+            health_status["warnings"] = f"Missing environment variables: {', '.join(missing_vars)}"
+
+        return JSONResponse(
+            content=health_status,
+            status_code=200,
+            headers={"Content-Type": "application/json"}
+        )
+    except Exception as e:
+        # If health check fails, return error status
+        error_status = {
+            "status": "unhealthy",
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "error": str(e),
+            "service": "Alibaba Cloud RDS MCP Server"
+        }
+        return JSONResponse(
+            content=error_status,
+            status_code=503,
+            headers={"Content-Type": "application/json"}
+        )
 
 
 class VerifyHeaderMiddleware(BaseHTTPMiddleware):
