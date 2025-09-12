@@ -56,7 +56,21 @@ DAS_KEYS = {
         "DiskUsage": ["disk_usage"],
         "IOPSUsage": ["data_iops_usage"],
         "IOBytesPS": ["data_io_bytes_ps"],
-        "MdlLockSession": ["mdl_lock_session"]
+        "MdlLockSession": ["mdl_lock_session"],
+        "RelayLogSize": ["relay_log_size"],
+        "UndoLogSize": ["undolog_size"],
+        "RedoLog_Size": ["redolog_size"],
+        "TempFileSize": ["temp_file_size"],
+        "InsSize": ["ins_size"],
+        "SysDataSize": ["sys_data_size"],
+        "GeneralLogSize": ["general_log_size"],
+        "SlowLogSize": ["slow_log_size"],
+        "BinlogSize": ["binlog_size"],
+        "UserDataSize": ["user_data_size"],
+        "InnodbRowsInsert":["Innodb_rows_inserted_ps"],
+        "MemCpuUsage": ["cpu_usage"],
+        "QPS": ["qps"],
+        "SLowSQL": ["slow_sql"]
     }
 }
 

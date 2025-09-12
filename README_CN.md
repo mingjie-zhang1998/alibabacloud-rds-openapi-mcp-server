@@ -136,6 +136,8 @@ git clone https://github.com/aliyun/alibabacloud-rds-openapi-mcp-server.git
 * `explain_sql`：执行 SQL `explain` 命令并返回 SQL 执行计划结果。
 * `show_engine_innodb_status`：执行 SQL `show engine innodb status` 命令并返回 SQL 执行结果。
 * `show_create_table`：执行 SQL `show create table` 命令并返回 SQL 执行结果。
+* `show_largest_table`: 查询空间占用率最高的前几张表。
+* `show_largest_table_fragment`: 查询空间碎片率最高的前几张表。
 * `query_sql`：执行只读 SQL 语句并返回 SQL 执行结果。
 
 
