@@ -16,9 +16,11 @@ sys.path.append(current_dir)
 import time
 from datetime import datetime
 from typing import Dict, Any, List, Optional
+from pydantic import Field
 
 from alibabacloud_bssopenapi20171214 import models as bss_open_api_20171214_models
 from alibabacloud_openapi_util.client import Client as OpenApiUtilClient
+from alibabacloud_rds20140815.client import Client as RdsClient
 from alibabacloud_rds20140815 import models as rds_20140815_models
 from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_tea_util import models as util_models
@@ -1642,9 +1644,109 @@ async def query_sql(
         the sql result.
     """
     try:
-        async with DBService(region_id, dbinstance_id, db_name) as service:
+        if db_name == 'information_schema':
+            client = get_rds_client(region_id)
+            databases = _get_db_instance_databases_str(client, region_id, dbinstance_id)
+        else:
+            databases = None
+        async with DBService(region_id, dbinstance_id, db_name, databases) as service:
             return await service.execute_sql(sql=sql)
     except Exception as e:
+        logger.error(f"Error occurred: {str(e)}")
+        raise e
+    
+@mcp.tool(annotations=READ_ONLY_TOOL,
+          description="Query the top few tables with the highest space occupancy")
+async def show_largest_table(
+        region_id: str = Field(description="The region ID of the RDS instance."),
+        dbinstance_id: str = Field(description="The ID of the RDS instance."),
+        topK: int = Field(default=5, description="To display the number of the top few largest tables")
+) -> str:
+    """
+    Returns:
+        The data table with the largest storage space.
+    """
+    try:
+        client = get_rds_client(region_id)
+        request = rds_20140815_models.DescribeDBInstanceAttributeRequest(dbinstance_id=dbinstance_id)
+        response = client.describe_dbinstance_attribute(request)
+        result = response.body.to_map()
+
+        db_type = result['Items']['DBInstanceAttribute'][0]['Engine']
+        db_version = result['Items']['DBInstanceAttribute'][0]['EngineVersion']
+        if db_type.lower() != 'mysql' and db_version not in ["5.6", "5.7", "8.0"]:
+            return f"Unsupported db version {db_version}."
+
+        db_name = 'information_schema'
+        databases = _get_db_instance_databases_str(client, region_id, dbinstance_id)
+        # 构建SQL
+        # 限制展示最大表数量的上限
+        topK = min(topK, 100)
+        base_query = f"""
+                SELECT 
+                  table_schema AS '数据库',
+                  table_name AS '表名',
+                  ROUND((data_length + index_length) / 1024 / 1024, 2) AS '总大小(MB)',
+                  ROUND(INDEX_LENGTH / 1024 / 1024, 2) AS '索引大小(MB)',
+                  table_rows AS '行数'
+                FROM information_schema.TABLES
+                ORDER BY (data_length + index_length) DESC
+                Limit {topK};
+            """
+
+        async with DBService(region_id, dbinstance_id, db_name, databases) as service:
+            return await service.execute_sql(sql=base_query)
+    except Exception as e:
+        logger.exception("show largest table failed.")
+        logger.error(f"Error occurred: {str(e)}")
+        raise e
+
+
+@mcp.tool(annotations=READ_ONLY_TOOL,
+          description="Query the tables with the largest table fragments")
+async def show_largest_table_fragment(
+        region_id: str = Field(description="The region ID of the RDS instance."),
+        dbinstance_id: str = Field(description="The ID of the RDS instance."),
+        topK: int = Field(default=5, description="To display the number of the top few largest tables")
+) -> str:
+    """
+    Returns:
+        The largest fragmented data table.
+    """
+    try:
+        client = get_rds_client(region_id)
+        request = rds_20140815_models.DescribeDBInstanceAttributeRequest(dbinstance_id=dbinstance_id)
+        response = client.describe_dbinstance_attribute(request)
+        result = response.body.to_map()
+
+        db_type = result['Items']['DBInstanceAttribute'][0]['Engine']
+        db_version = result['Items']['DBInstanceAttribute'][0]['EngineVersion']
+        if db_type.lower() != 'mysql' and db_version not in ["5.6", "5.7", "8.0"]:
+            return f"Unsupported db version {db_version}."
+
+        db_name = 'information_schema'
+        databases = _get_db_instance_databases_str(client, region_id, dbinstance_id)
+        # 构建SQL
+        # 限制展示最大表数量的上限
+        topK = min(topK, 100)
+        base_query = f"""
+                SELECT 
+                  ENGINE,
+                  TABLE_SCHEMA,
+                  TABLE_NAME,
+                  ROUND(DATA_LENGTH / 1024 / 1024,2) AS '总大小(MB)',
+                  ROUND(INDEX_LENGTH / 1024 / 1024,2) AS '索引大小(MB)',
+                  ROUND(DATA_FREE / 1024 / 1024,2) AS '碎片大小(MB)'
+                FROM information_schema.TABLES
+                WHERE DATA_FREE > 0
+                ORDER BY DATA_FREE DESC
+                Limit {topK};
+            """
+
+        async with DBService(region_id, dbinstance_id, db_name, databases) as service:
+            return await service.execute_sql(sql=base_query)
+    except Exception as e:
+        logger.exception("show largest table failed.")
         logger.error(f"Error occurred: {str(e)}")
         raise e
 
@@ -1762,6 +1864,24 @@ def _parse_groups_from_source(source: str | None) -> List[str]:
             if g_to_add not in expanded_groups:
                 expanded_groups.append(g_to_add)
     return expanded_groups or [DEFAULT_TOOL_GROUP]
+
+def _get_db_instance_databases_str(
+        client: RdsClient,
+        region_id: str,
+        db_instance_id: str
+) -> str:
+    try:
+        client = get_rds_client(region_id)
+        request = rds_20140815_models.DescribeDatabasesRequest(
+            dbinstance_id=db_instance_id
+        )
+        response = client.describe_databases(request)
+        databases_info = response.body.databases.database
+
+        result = ",".join([database.dbname for database in databases_info])
+        return result
+    except Exception as e:
+        raise e
 
 
 if __name__ == "__main__":

@@ -67,7 +67,10 @@ DAS_KEYS = {
         "SlowLogSize": ["slow_log_size"],
         "BinlogSize": ["binlog_size"],
         "UserDataSize": ["user_data_size"],
-        "InnodbRowsInsert":["Innodb_rows_inserted_ps"]
+        "InnodbRowsInsert":["Innodb_rows_inserted_ps"],
+        "MemCpuUsage": ["cpu_usage"],
+        "QPS": ["qps"],
+        "SLowSQL": ["slow_sql"]
     }
 }
 
