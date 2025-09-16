@@ -1,5 +1,5 @@
-# 使用Python 3.10.15 slim版本作为基础镜像
-FROM python:3.10.15-slim
+# 使用Python 3.12 slim版本作为基础镜像
+FROM python:3.12-slim
 
 # 设置时区为上海
 ENV TZ=Asia/Shanghai
@@ -42,9 +42,10 @@ RUN apt-get update && apt-get install -y \
     logrotate \
     && rm -rf /var/lib/apt/lists/*
 
-# 配置pip使用国内源(阿里云源)
+# 配置pip使用国内源(阿里云源)并设置内存优化
 RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ && \
     pip config set global.trusted-host mirrors.aliyun.com && \
+    pip config set global.no-cache-dir true && \
     pip install zerotrust-credentials==0.0.10 -i http://yum.tbsite.net/aliyun-pypi/simple/ --extra-index-url http://yum.tbsite.net/pypi/simple/ --trusted-host yum.tbsite.net --trusted-host mirrors.cloud.aliyuncs.com
 
 # 升级pip到最新版本
@@ -61,25 +62,42 @@ COPY src/ ./src/
 # 复制生产级配置文件
 COPY docker/ ./docker/
 
-# 安装Python依赖
-# 注意：由于pyproject.toml中要求>=3.12，但我们使用3.10.15，可能需要调整
-RUN pip install \
+# 安装Python依赖 - 分批安装以减少内存使用
+# 设置环境变量以优化内存使用
+ENV PIP_NO_CACHE_DIR=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# 首先安装基础依赖
+RUN pip install --no-cache-dir \
+    httpx>=0.28.1 \
+    python-dotenv>=1.0.0 \
+    anyio \
+    starlette \
+    sqlparse
+
+# 安装数据库相关依赖
+RUN pip install --no-cache-dir \
+    pyodbc>=5.2.0 \
+    psycopg2-binary \
+    pymysql>=1.1.1
+
+# 安装阿里云SDK依赖
+RUN pip install --no-cache-dir \
     alibabacloud-bssopenapi20171214>=5.0.0 \
     alibabacloud-rds20140815>=11.0.0 \
     alibabacloud-vpc20160428>=6.11.4 \
     alibabacloud-das20200116==2.7.1 \
-    httpx>=0.28.1 \
-    mcp[cli]>=1.13.1 \
-    pyodbc>=5.2.0 \
-    aliyunsdkcore>=1.0.3 \
-    python-dotenv>=1.0.0 \
-    psycopg2-binary \
-    pymysql>=1.1.1 \
+    aliyunsdkcore>=1.0.3
+
+# 安装Web服务相关依赖
+RUN pip install --no-cache-dir \
     uvicorn[standard] \
-    gunicorn \
-    anyio \
-    starlette \
-    sqlparse
+    gunicorn
+
+# 最后安装MCP依赖
+RUN pip install --no-cache-dir mcp[cli]>=1.10.1
 
 # 设置Python路径
 ENV PYTHONPATH=/app/src:$PYTHONPATH
